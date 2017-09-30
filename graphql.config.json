@@ -1,0 +1,18 @@
+{
+  "schema": {
+    "file": "app/src/main/graphql/com/squareup/okhttptestapp/github/schema.json"
+  },
+
+  "endpoints" : [
+    {
+      "name": "Github (https://api.github.com/graphql)",
+      "url": "https://api.github.com/graphql",
+      "options" : {
+        "headers": {
+          "user-agent" : "OkHttp Test App"
+        }
+      }
+    }
+  ]
+
+}

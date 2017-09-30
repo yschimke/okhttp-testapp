@@ -1,0 +1,14 @@
+query IssuesQuery($owner: String!, $repositoryName: String!) {
+  repository(name: $repositoryName, owner: $owner) {
+    issues(orderBy: {field: UPDATED_AT, direction: DESC}, first: 10) {
+      nodes {
+        updatedAt
+        number
+        title
+        author {
+          login
+        }
+      }
+    }
+  }
+}
