@@ -1,15 +1,10 @@
 package com.squareup.okhttptestapp.dumper
 
-import android.util.Log
 import com.facebook.stetho.dumpapp.DumperContext
 import com.facebook.stetho.dumpapp.DumperPlugin
 import com.squareup.okhttptestapp.OkHttpTestApp
-import okhttp3.Call
-import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.Response
-import java.io.IOException
 
 class TestRequestDumperPlugin : DumperPlugin {
   override fun dump(dumpContext: DumperContext) {

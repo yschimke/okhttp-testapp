@@ -11,7 +11,6 @@ import com.apollographql.apollo.cache.normalized.sql.ApolloSqlHelper
 import com.apollographql.apollo.cache.normalized.sql.SqlNormalizedCacheFactory
 import com.apollographql.apollo.rx2.Rx2Apollo
 import com.facebook.stetho.okhttp3.StethoInterceptor
-import com.squareup.okhttptestapp.MainActivity.Companion
 import com.squareup.okhttptestapp.github.GithubAuthInterceptor
 import com.squareup.okhttptestapp.github.ISO8601Adapter
 import com.squareup.okhttptestapp.github.IdFieldCacheKeyResolver
@@ -20,7 +19,6 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import okhttp3.OkHttpClient
-
 
 class NetworkClients(context: Context) {
   private val SQL_CACHE_NAME = "github"
