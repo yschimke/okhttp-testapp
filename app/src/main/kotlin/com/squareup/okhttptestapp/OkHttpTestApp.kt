@@ -1,6 +1,8 @@
 package com.squareup.okhttptestapp
 
 import android.app.Application
+import android.support.v4.app.Fragment
+import android.support.v7.app.AppCompatActivity
 import com.facebook.stetho.Stetho
 import com.squareup.okhttptestapp.dumper.TestRequestDumperPlugin
 
@@ -20,5 +22,15 @@ class OkHttpTestApp : Application() {
         }
         .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(applicationContext))
         .build())
+
+    instance = this
+  }
+
+  companion object {
+    var instance: OkHttpTestApp? = null
   }
 }
+
+fun AppCompatActivity.networkClients() = (application as OkHttpTestApp).networkClients!!
+
+fun Fragment.networkClients() = (this.activity.application as OkHttpTestApp).networkClients!!

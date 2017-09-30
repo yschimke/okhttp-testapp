@@ -13,7 +13,9 @@ import com.apollographql.apollo.rx2.Rx2Apollo
 import com.facebook.stetho.okhttp3.StethoInterceptor
 import com.squareup.okhttptestapp.MainActivity.Companion
 import com.squareup.okhttptestapp.github.GithubAuthInterceptor
+import com.squareup.okhttptestapp.github.ISO8601Adapter
 import com.squareup.okhttptestapp.github.IdFieldCacheKeyResolver
+import com.squareup.okhttptestapp.github.type.CustomType
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -31,15 +33,18 @@ class NetworkClients(context: Context) {
     appClient = OkHttpClient.Builder().addNetworkInterceptor(GithubAuthInterceptor()).addNetworkInterceptor(
         StethoInterceptor()).build()
 
-    testClient = OkHttpClient.Builder().addNetworkInterceptor(
-        StethoInterceptor()).build()
+    val testBuilder = TestSetup.configureBuilder(OkHttpClient.Builder())
+    testBuilder.addNetworkInterceptor(StethoInterceptor())
+    testClient = testBuilder.build()
 
     val normalizedCacheFactory = LruNormalizedCacheFactory(EvictionPolicy.NO_EVICTION)
         .chain(SqlNormalizedCacheFactory(ApolloSqlHelper(context, SQL_CACHE_NAME)))
 
     apolloClient = ApolloClient.builder().serverUrl(
         "https://api.github.com/graphql").okHttpClient(appClient).normalizedCache(
-        normalizedCacheFactory, IdFieldCacheKeyResolver).build()
+        normalizedCacheFactory, IdFieldCacheKeyResolver)
+        .addCustomTypeAdapter(CustomType.DATETIME, ISO8601Adapter())
+        .build()
   }
 }
 

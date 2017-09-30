@@ -11,55 +11,26 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
+import com.apollographql.apollo.fetcher.ApolloResponseFetchers.*
 import com.squareup.okhttptestapp.github.IssuesQuery
-import com.squareup.okhttptestapp.github.IssuesQuery.Data
-import io.reactivex.Observable
+import com.squareup.okhttptestapp.github.issues
 import kotlinx.android.synthetic.main.activity_main.container
 import kotlinx.android.synthetic.main.activity_main.toolbar
+import kotlinx.android.synthetic.main.fragment_main.execute
 
 class MainActivity : AppCompatActivity() {
-
-  /**
-   * The [android.support.v4.view.PagerAdapter] that will provide
-   * fragments for each of the sections. We use a
-   * {@link FragmentPagerAdapter} derivative, which will keep every
-   * loaded fragment in memory. If this becomes too memory intensive, it
-   * may be best to switch to a
-   * [android.support.v4.app.FragmentStatePagerAdapter].
-   */
   private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
-
     setSupportActionBar(toolbar)
-    // Create the adapter that will return a fragment for each of the three
-    // primary sections of the activity.
+
     mSectionsPagerAdapter = SectionsPagerAdapter(supportFragmentManager)
 
-    // Set up the ViewPager with the sections adapter.
     container.adapter = mSectionsPagerAdapter
-
-    val query = networkClients().apolloClient.query(
-        IssuesQuery.builder().owner("square").repositoryName("okhttp").build()).responseFetcher(
-        ApolloResponseFetchers.NETWORK_ONLY)
-
-    val b: Observable<Response<Data>> = query.observable()
-
-    b.subscribe({ response ->
-      run {
-        val map = response.data()?.repository()?.issues()?.nodes()?.map { it.title() }?.joinToString(
-            "\n").orEmpty()
-        Log.i(TAG, map)
-      }
-    },
-        { Log.i(TAG, "failed: ", it) })
   }
-
-  private fun networkClients() = (application as OkHttpTestApp).networkClients!!
 
   override fun onCreateOptionsMenu(menu: Menu): Boolean {
     menuInflater.inflate(R.menu.menu_main, menu)
@@ -106,7 +77,23 @@ class MainActivity : AppCompatActivity() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?): View? {
       val rootView = inflater.inflate(R.layout.fragment_main, container, false)
+
       return rootView
+    }
+
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+      Log.i(TAG, "$execute")
+
+      execute.setOnClickListener {
+        runGraphQLQuery()
+      }
+    }
+
+    private fun runGraphQLQuery() {
+      networkClients().apolloClient.query(
+          IssuesQuery.builder().owner("square").repositoryName("okhttp").build()).responseFetcher(
+          NETWORK_ONLY).observable().subscribe(
+          { response -> Log.i(TAG, response.issues().joinToString("\n")) }, { Log.i(TAG, "failed: ", it) })
     }
 
     companion object {
