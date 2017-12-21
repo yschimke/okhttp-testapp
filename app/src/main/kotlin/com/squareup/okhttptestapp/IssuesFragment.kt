@@ -20,7 +20,7 @@ class IssuesFragment : Fragment() {
     return rootView
   }
 
-  override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     Log.i(MainActivity.TAG, "$execute")
 
     execute.setOnClickListener {

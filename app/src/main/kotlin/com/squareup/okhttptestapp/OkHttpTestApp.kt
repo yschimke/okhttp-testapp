@@ -30,4 +30,4 @@ class OkHttpTestApp : Application() {
   }
 }
 
-fun Fragment.networkClients() = (this.activity.application as OkHttpTestApp).networkClients!!
+fun Fragment.networkClients() = (this.activity!!.application as OkHttpTestApp).networkClients!!

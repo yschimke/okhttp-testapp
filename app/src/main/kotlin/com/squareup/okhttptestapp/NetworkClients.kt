@@ -33,6 +33,7 @@ class NetworkClients(context: Context) {
 
     val testBuilder = TestSetup.configureBuilder(OkHttpClient.Builder())
     testBuilder.addNetworkInterceptor(StethoInterceptor())
+    testBuilder.eventListener(TestEventListener())
     testClient = testBuilder.build()
 
     val normalizedCacheFactory = LruNormalizedCacheFactory(EvictionPolicy.NO_EVICTION)

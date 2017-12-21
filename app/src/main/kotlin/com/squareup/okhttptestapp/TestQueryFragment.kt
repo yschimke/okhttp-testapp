@@ -12,6 +12,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_main.execute
 import kotlinx.android.synthetic.main.fragment_main.log
+import kotlinx.android.synthetic.main.fragment_main.url
+import kotlinx.android.synthetic.main.fragment_main.view.url
 
 class TestQueryFragment : Fragment() {
 
@@ -19,14 +21,16 @@ class TestQueryFragment : Fragment() {
       savedInstanceState: Bundle?): View? {
     val rootView = inflater.inflate(layout.fragment_main, container, false)
 
+    rootView.url.setText(TestSetup.getDefaultUrl())
+
     return rootView
   }
 
-  override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     Log.i(MainActivity.TAG, "$execute")
 
     execute.setOnClickListener {
-      val call = networkClients().testClient.newCall(TestSetup.createRequest())
+      val call = networkClients().testClient.newCall(TestSetup.createRequest(url.text.toString()))
 
       Observable.fromCallable({
         val result = call.execute()
