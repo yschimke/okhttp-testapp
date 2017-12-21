@@ -1,5 +1,10 @@
 package com.squareup.okhttptestapp
 
+import android.content.Context
+import com.franmontiel.persistentcookiejar.PersistentCookieJar
+import com.franmontiel.persistentcookiejar.cache.SetCookieCache
+import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
+import okhttp3.CookieJar
 import okhttp3.OkHttpClient
 import okhttp3.OkHttpClient.Builder
 import okhttp3.Request
@@ -13,25 +18,16 @@ import java.util.Collections
 
 
 object TestSetup {
-  fun configureBuilder(clientBuilder: OkHttpClient.Builder): Builder {
+  fun configureBuilder(context: Context, clientBuilder: OkHttpClient.Builder): Builder {
     // nothing by default
 
 //    clientBuilder.readTimeout(3, SECONDS)
 
-    val specTLS1_2 = ConnectionSpec.Builder(ConnectionSpec.COMPATIBLE_TLS).build()
-//
-//    val spec = ConnectionSpec.Builder(ConnectionSpec.COMPATIBLE_TLS)
-////        .tlsVersions(TlsVersion.TLS_1_2)
-////        .cipherSuites(
-////            CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-////            CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-////            CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-////            CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256)
-//        .build()
-
-    clientBuilder.connectionSpecs(listOf(ConnectionSpec.MODERN_TLS, ConnectionSpec.COMPATIBLE_TLS, ConnectionSpec.CLEARTEXT))
+//    clientBuilder.connectionSpecs(listOf(ConnectionSpec.MODERN_TLS, ConnectionSpec.COMPATIBLE_TLS, ConnectionSpec.CLEARTEXT))
 
 //    installGmsProvider();
+
+    clientBuilder.cookieJar(PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(context)))
 
     return clientBuilder
   }
