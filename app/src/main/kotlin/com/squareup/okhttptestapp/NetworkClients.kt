@@ -28,7 +28,8 @@ class NetworkClients(context: Context) {
   val testClient: OkHttpClient
 
   init {
-    appClient = OkHttpClient.Builder().addNetworkInterceptor(GithubAuthInterceptor()).addNetworkInterceptor(
+    appClient = OkHttpClient.Builder().addNetworkInterceptor(
+        GithubAuthInterceptor()).addNetworkInterceptor(
         StethoInterceptor()).build()
 
     val testBuilder = TestSetup.configureBuilder(context, OkHttpClient.Builder())

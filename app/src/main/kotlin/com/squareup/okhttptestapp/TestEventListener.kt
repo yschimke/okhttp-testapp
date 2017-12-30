@@ -1,17 +1,11 @@
 package com.squareup.okhttptestapp
 
 import android.util.Log
+import okhttp3.*
 import java.io.IOException
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Proxy
-import okhttp3.Call
-import okhttp3.Connection
-import okhttp3.EventListener
-import okhttp3.Handshake
-import okhttp3.Protocol
-import okhttp3.Request
-import okhttp3.Response
 
 class TestEventListener : EventListener() {
   override fun callStart(call: Call?) {}
@@ -28,9 +22,12 @@ class TestEventListener : EventListener() {
     Log.i(TAG, handshake?.cipherSuite()?.javaName())
   }
 
-  override fun connectEnd(call: Call?, inetSocketAddress: InetSocketAddress?, proxy: Proxy?, protocol: Protocol?) {}
+  override fun connectEnd(call: Call?, inetSocketAddress: InetSocketAddress?, proxy: Proxy?,
+      protocol: Protocol?) {
+  }
 
-  override fun connectFailed(call: Call?, inetSocketAddress: InetSocketAddress?, proxy: Proxy?, protocol: Protocol?,
+  override fun connectFailed(call: Call?, inetSocketAddress: InetSocketAddress?, proxy: Proxy?,
+      protocol: Protocol?,
       ioe: IOException?) {
   }
 

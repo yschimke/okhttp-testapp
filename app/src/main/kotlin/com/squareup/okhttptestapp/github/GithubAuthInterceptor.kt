@@ -6,7 +6,8 @@ import okhttp3.Response
 class GithubAuthInterceptor : Interceptor {
   override fun intercept(chain: Interceptor.Chain): Response {
     val request = when {
-      chain.request().url().host() == "api.github.com" -> chain.request().newBuilder().addHeader("Authorization",
+      chain.request().url().host() == "api.github.com" -> chain.request().newBuilder().addHeader(
+          "Authorization",
           "bearer xxx").build()
       else -> chain.request()
     }

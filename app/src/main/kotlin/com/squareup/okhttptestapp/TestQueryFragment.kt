@@ -35,6 +35,8 @@ class TestQueryFragment : Fragment() {
       Observable.fromCallable({
         val result = call.execute()
         Log.i(TAG, result.headers().toString())
+        Log.i(TAG, "cache: " + (result.cacheResponse()?.code()))
+        Log.i(TAG, "network: " + (result.networkResponse()?.code()))
         result.body()!!.string()
       })
           .subscribeOn(Schedulers.io())
