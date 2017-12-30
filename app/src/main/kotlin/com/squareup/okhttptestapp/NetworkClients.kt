@@ -20,31 +20,32 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import okhttp3.OkHttpClient
 
-class NetworkClients(context: Context) {
+class NetworkClients(val context: Context) {
   private val SQL_CACHE_NAME = "github"
 
-  val apolloClient: ApolloClient
-  val appClient: OkHttpClient
-  val testClient: OkHttpClient
+  val apolloClient: ApolloClient by lazy { createApolloClient() }
 
-  init {
-    appClient = OkHttpClient.Builder().addNetworkInterceptor(
-        GithubAuthInterceptor()).addNetworkInterceptor(
-        StethoInterceptor()).build()
-
-    val testBuilder = TestSetup.configureBuilder(context, OkHttpClient.Builder())
-    testBuilder.addNetworkInterceptor(StethoInterceptor())
-    testBuilder.eventListener(TestEventListener())
-    testClient = testBuilder.build()
-
+  private fun createApolloClient(): ApolloClient {
     val normalizedCacheFactory = LruNormalizedCacheFactory(EvictionPolicy.NO_EVICTION)
         .chain(SqlNormalizedCacheFactory(ApolloSqlHelper(context, SQL_CACHE_NAME)))
 
-    apolloClient = ApolloClient.builder().serverUrl(
+    return ApolloClient.builder().serverUrl(
         "https://api.github.com/graphql").okHttpClient(appClient).normalizedCache(
         normalizedCacheFactory, IdFieldCacheKeyResolver)
         .addCustomTypeAdapter(CustomType.DATETIME, ISO8601Adapter())
         .build()
+  }
+
+  val appClient: OkHttpClient by lazy {
+    OkHttpClient.Builder().addNetworkInterceptor(
+        GithubAuthInterceptor()).addNetworkInterceptor(
+        StethoInterceptor()).build()
+  }
+  val testClient: OkHttpClient by lazy {
+    val testBuilder = TestSetup.configureBuilder(context, OkHttpClient.Builder())
+    testBuilder.addNetworkInterceptor(StethoInterceptor())
+    testBuilder.eventListener(TestEventListener())
+    testBuilder.build()
   }
 }
 
