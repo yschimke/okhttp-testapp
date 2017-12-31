@@ -73,7 +73,36 @@ dependencies {
   implementation 'com.facebook.stetho:stetho:1.5.0'
   implementation 'com.facebook.stetho:stetho-okhttp3:1.5.0'
   implementation 'com.squareup.retrofit2:retrofit:2.3.0'
-  implementation 'com.github.franmontiel:PersistentCookieJar:v1.0.1'
+  implementation 'com.github.franmontiel:PersistentCookieJar:v1.0.1'    // Anko Commons
+  implementation "org.jetbrains.anko:anko-commons:$anko_version"
+  // Anko Layouts
+  implementation "org.jetbrains.anko:anko-sdk25:$anko_version" // sdk15, sdk19, sdk21, sdk23 are also available
+  implementation "org.jetbrains.anko:anko-appcompat-v7:$anko_version"
+  // Coroutine listeners for Anko Layouts
+  implementation "org.jetbrains.anko:anko-sdk25-coroutines:$anko_version"
+  implementation "org.jetbrains.anko:anko-appcompat-v7-coroutines:$anko_version"
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.21'
+  // Anko SQLite
+  implementation "org.jetbrains.anko:anko-sqlite:$anko_version"
+  // ...
+  // Litho
+  implementation 'com.facebook.litho:litho-core:0.11.0'
+  implementation 'com.facebook.litho:litho-widget:0.11.0'
+  compileOnly 'com.facebook.litho:litho-annotations:0.11.0'
+
+  annotationProcessor 'com.facebook.litho:litho-processor:0.11.0'
+
+  // SoLoader
+  implementation 'com.facebook.soloader:soloader:0.2.0'
+
+  // For integration with Fresco
+  implementation 'com.facebook.litho:litho-fresco:0.11.0'
+
+  // For testing
+  testImplementation 'com.facebook.litho:litho-testing:0.11.0'
+
+  implementation 'com.bugsnag:bugsnag-android:4.1.5'
+
   testImplementation 'junit:junit:4.12'
   androidTestImplementation('com.android.support.test.espresso:espresso-core:3.0.1', {
     exclude group: 'com.android.support', module: 'support-annotations'

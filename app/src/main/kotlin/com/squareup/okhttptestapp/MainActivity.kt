@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import com.bugsnag.android.Bugsnag
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.security.ProviderInstaller
@@ -29,6 +30,8 @@ class MainActivity : AppCompatActivity() {
     container.adapter = mSectionsPagerAdapter
 
     installGmsProvider();
+
+    Bugsnag.init(this)
   }
 
   override fun onCreateOptionsMenu(menu: Menu): Boolean {
