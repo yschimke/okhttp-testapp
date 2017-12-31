@@ -83,7 +83,26 @@ dependencies {
   implementation "org.jetbrains.anko:anko-appcompat-v7-coroutines:$anko_version"
   implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.21'
   // Anko SQLite
-  compile "org.jetbrains.anko:anko-sqlite:$anko_version"
+  implementation "org.jetbrains.anko:anko-sqlite:$anko_version"
+  // ...
+  // Litho
+  implementation 'com.facebook.litho:litho-core:0.11.0'
+  implementation 'com.facebook.litho:litho-widget:0.11.0'
+  compileOnly 'com.facebook.litho:litho-annotations:0.11.0'
+
+  annotationProcessor 'com.facebook.litho:litho-processor:0.11.0'
+
+  // SoLoader
+  implementation 'com.facebook.soloader:soloader:0.2.0'
+
+  // For integration with Fresco
+  implementation 'com.facebook.litho:litho-fresco:0.11.0'
+
+  // For testing
+  testImplementation 'com.facebook.litho:litho-testing:0.11.0'
+
+  implementation 'com.bugsnag:bugsnag-android:4.1.5'
+
   testImplementation 'junit:junit:4.12'
   androidTestImplementation('com.android.support.test.espresso:espresso-core:3.0.1', {
     exclude group: 'com.android.support', module: 'support-annotations'
