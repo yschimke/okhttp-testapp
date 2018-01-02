@@ -5,13 +5,19 @@ import android.support.v4.app.Fragment
 import com.facebook.stetho.Stetho
 import com.squareup.okhttptestapp.dumper.TestRequestDumperPlugin
 import android.os.StrictMode
+import com.bugsnag.android.Bugsnag
+import com.facebook.soloader.SoLoader
 import org.jetbrains.anko.doAsync
 
+var application: OkHttpTestApp? = null
+
 class OkHttpTestApp : Application() {
-  var networkClients: NetworkClients? = null
+  lateinit var networkClients: NetworkClients
 
   override fun onCreate() {
     super.onCreate()
+
+    Bugsnag.init(applicationContext)
 
     strictMode()
 
@@ -21,34 +27,34 @@ class OkHttpTestApp : Application() {
       Stetho.initialize(Stetho.newInitializerBuilder(applicationContext)
           .enableDumpapp {
             Stetho.DefaultDumperPluginsBuilder(applicationContext)
-                .provide(TestRequestDumperPlugin())
+                .provide(TestRequestDumperPlugin(this@OkHttpTestApp))
                 .finish()
           }
           .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(applicationContext))
           .build())
     }
 
-    instance = this
+    SoLoader.init(this, false)
+
+    application = this
   }
 
-  fun strictMode() {
-    StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder()
-        .detectDiskReads()
-        .detectDiskWrites()
-        .detectNetwork()   // or .detectAll() for all detectable problems
-        .penaltyLog()
-        .build())
-    StrictMode.setVmPolicy(StrictMode.VmPolicy.Builder()
-        .detectLeakedSqlLiteObjects()
-        .detectLeakedClosableObjects()
-        .penaltyLog()
-        .penaltyDeath()
-        .build())
-  }
+  private fun strictMode() {
+    if (BuildConfig.DEBUG) {
+      StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder()
+          .detectDiskReads()
+          .detectDiskWrites()
+          .detectNetwork()
+          .penaltyLog()
+          .build())
 
-  companion object {
-    var instance: OkHttpTestApp? = null
+      StrictMode.setVmPolicy(StrictMode.VmPolicy.Builder()
+          .detectLeakedSqlLiteObjects()
+          .detectLeakedClosableObjects()
+          .penaltyLog()
+          .build())
+    }
   }
 }
 
-fun Fragment.networkClients() = (this.activity!!.application as OkHttpTestApp).networkClients!!
+fun Fragment.networkClients() = (this.activity!!.application as OkHttpTestApp).networkClients

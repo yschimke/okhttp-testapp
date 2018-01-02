@@ -58,7 +58,7 @@ dependencies {
   implementation "com.apollographql.apollo:apollo-android-support:$apollo_version"
   implementation "com.apollographql.apollo:apollo-rx2-support:$apollo_version"
   implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
-  implementation 'io.reactivex.rxjava2:rxjava:2.1.3'
+  implementation 'io.reactivex.rxjava2:rxjava:2.1.8'
   implementation fileTree(include: ['*.jar'], dir: 'libs')
   implementation 'com.squareup.okhttp3:okhttp:3.9.1'
   implementation 'com.android.support:appcompat-v7:27.0.2'
@@ -88,9 +88,9 @@ dependencies {
   // Litho
   implementation 'com.facebook.litho:litho-core:0.11.0'
   implementation 'com.facebook.litho:litho-widget:0.11.0'
-  compileOnly 'com.facebook.litho:litho-annotations:0.11.0'
+  implementation 'com.facebook.litho:litho-annotations:0.11.0'
 
-  annotationProcessor 'com.facebook.litho:litho-processor:0.11.0'
+  kapt 'com.facebook.litho:litho-processor:0.11.0'
 
   // SoLoader
   implementation 'com.facebook.soloader:soloader:0.2.0'
