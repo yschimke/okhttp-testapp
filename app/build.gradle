@@ -76,15 +76,17 @@ dependencies {
   // Litho
   implementation 'com.facebook.litho:litho-core:0.11.0'
   implementation 'com.facebook.litho:litho-widget:0.11.0'
+  implementation 'com.facebook.litho:litho-fresco:0.11.0'
+  implementation 'com.facebook.litho:litho-sections-core:0.11.0'
+  implementation 'com.facebook.litho:litho-sections-widget:0.11.0'
   implementation 'com.facebook.litho:litho-annotations:0.11.0'
+  implementation 'com.facebook.litho:litho-sections-annotations:0.11.0'
 
   kapt 'com.facebook.litho:litho-processor:0.11.0'
+  kapt 'com.facebook.litho:litho-sections-processor:0.11.0'
 
   // SoLoader
   implementation 'com.facebook.soloader:soloader:0.2.0'
-
-  // For integration with Fresco
-  implementation 'com.facebook.litho:litho-fresco:0.11.0'
 
   // For testing
   testImplementation 'com.facebook.litho:litho-testing:0.11.0'

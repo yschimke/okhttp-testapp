@@ -7,23 +7,29 @@ import com.facebook.litho.ComponentLayout
 import com.facebook.litho.annotations.LayoutSpec
 import com.facebook.litho.annotations.OnCreateLayout
 import com.facebook.litho.annotations.Prop
-import com.facebook.litho.widget.RecyclerBinder
+import com.facebook.litho.sections.SectionContext
+import com.facebook.litho.sections.widget.RecyclerCollectionComponent
 import com.facebook.yoga.YogaEdge
 import okhttp3.Request
 
 @LayoutSpec
-class MainComponentSpec {
-  companion object {
-    @JvmStatic
-    @OnCreateLayout
-    fun onCreateLayout(
-        c: ComponentContext, @Prop initialUrl: String, @Prop recyclerBinder: RecyclerBinder, @Prop executeListener: (Request) -> Unit): ComponentLayout {
-      return Column.create(c)
-          .paddingDip(YogaEdge.ALL, 16f)
-          .backgroundColor(Color.WHITE)
-          .child(QueryComponent.create(c).initialUrl(initialUrl).executeListener(executeListener).build())
-          .child(ResultsListComponent.create(c).recyclerBinder(recyclerBinder).build())
-          .build()
-    }
+object MainComponentSpec {
+  @OnCreateLayout
+  fun onCreateLayout(
+      c: ComponentContext, @Prop initialUrl: String, @Prop executeListener: (Request) -> Unit): ComponentLayout {
+    val list = RecyclerCollectionComponent
+        .create(c)
+        .section(
+            ResultsListSection.create(SectionContext(c)).results(listOf()).build())
+        .disablePTR(true)
+        .build()
+
+    return Column.create(c)
+        .paddingDip(YogaEdge.ALL, 16f)
+        .backgroundColor(Color.WHITE)
+        .child(QueryComponent.create(c).initialUrl(initialUrl).executeListener(
+            executeListener).build())
+        .child(list)
+        .build()
   }
 }

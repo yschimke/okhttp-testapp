@@ -8,22 +8,24 @@ import android.util.Log
 import com.facebook.litho.Border
 import com.facebook.litho.ComponentContext
 import com.facebook.litho.LithoView
+import com.facebook.litho.sections.SectionContext
 import com.facebook.litho.widget.LinearLayoutInfo
 import com.facebook.litho.widget.RecyclerBinder
 import com.facebook.litho.widget.Text
 import com.facebook.yoga.YogaEdge
+import com.squareup.okhttptestapp.model.ResponseModel
 import com.squareup.okhttptestapp.spec.MainComponent
 import kotlinx.coroutines.experimental.async
 import okhttp3.Request
 
 class MainActivity : Activity() {
-  lateinit var c: ComponentContext
-  lateinit var binder: RecyclerBinder
+  lateinit var c: SectionContext
+  val results = mutableListOf<ResponseModel>()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    c = ComponentContext(this)
+    c = SectionContext(this)
 
     binder = RecyclerBinder.Builder().layoutInfo(
         LinearLayoutInfo(c.baseContext, OrientationHelper.VERTICAL, false)).build(c)
