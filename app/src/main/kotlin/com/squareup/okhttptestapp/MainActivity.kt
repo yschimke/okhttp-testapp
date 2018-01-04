@@ -1,56 +1,44 @@
 package com.squareup.okhttptestapp
 
 import android.app.Activity
-import android.graphics.Color
 import android.os.Bundle
-import android.support.v7.widget.OrientationHelper
 import android.util.Log
-import com.facebook.litho.Border
-import com.facebook.litho.ComponentContext
 import com.facebook.litho.LithoView
 import com.facebook.litho.sections.SectionContext
-import com.facebook.litho.widget.LinearLayoutInfo
-import com.facebook.litho.widget.RecyclerBinder
-import com.facebook.litho.widget.Text
-import com.facebook.yoga.YogaEdge
 import com.squareup.okhttptestapp.model.ResponseModel
 import com.squareup.okhttptestapp.spec.MainComponent
 import kotlinx.coroutines.experimental.async
 import okhttp3.Request
+import okhttp3.Response
 
 class MainActivity : Activity() {
   lateinit var c: SectionContext
-  val results = mutableListOf<ResponseModel>()
+  val results = mutableListOf<ResponseModel>(ResponseModel(-1, "Hello", null))
+
+  private lateinit var lithoView: LithoView
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
     c = SectionContext(this)
 
-    binder = RecyclerBinder.Builder().layoutInfo(
-        LinearLayoutInfo(c.baseContext, OrientationHelper.VERTICAL, false)).build(c)
-
-    val component = MainComponent.create(c).initialUrl(
-        "https://nghttp2.org/httpbin/get").executeListener({ executeCall(it) }).recyclerBinder(
-        binder).build()
-
-    setContentView(LithoView.create(this, component))
+    lithoView = LithoView.create(this, view())
+    setContentView(lithoView)
   }
+
+  private fun view() = MainComponent.create(c).initialUrl(
+      "https://nghttp2.org/httpbin/get").executeListener({ executeCall(it) }).results(results).build()
+
+  private var count: Int = 0
 
   private fun executeCall(request: Request) {
     Log.i(TAG, request.url().toString())
 
     async {
       var response = (application as OkHttpTestApp).networkClients.testClient.execute(request)
-      showResults(response.body()!!.string())
+      results.add(ResponseModel(count++, response.body()!!.string(), response))
+      lithoView.setComponentAsync(view())
     }
-  }
-
-  private fun showResults(text: String) {
-    val border = Border.create(c).color(YogaEdge.BOTTOM, Color.BLACK).widthDip(YogaEdge.BOTTOM,
-        1).build()
-    binder.insertItemAt(0,
-        Text.create(c).text(text).textSizeSp(12f).border(border).build())
   }
 
   companion object {
