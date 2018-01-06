@@ -1,12 +1,12 @@
 package com.squareup.okhttptestapp
 
 import android.app.Application
-import android.support.v4.app.Fragment
-import com.facebook.stetho.Stetho
-import com.squareup.okhttptestapp.dumper.TestRequestDumperPlugin
 import android.os.StrictMode
+import android.support.v4.app.Fragment
 import com.bugsnag.android.Bugsnag
 import com.facebook.soloader.SoLoader
+import com.facebook.stetho.Stetho
+import com.squareup.okhttptestapp.dumper.TestRequestDumperPlugin
 import org.jetbrains.anko.doAsync
 
 var application: OkHttpTestApp? = null

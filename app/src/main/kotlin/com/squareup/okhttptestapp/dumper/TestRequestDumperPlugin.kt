@@ -1,10 +1,8 @@
 package com.squareup.okhttptestapp.dumper
 
-import android.content.Context
 import com.facebook.stetho.dumpapp.DumperContext
 import com.facebook.stetho.dumpapp.DumperPlugin
 import com.squareup.okhttptestapp.OkHttpTestApp
-import com.squareup.okhttptestapp.application
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
