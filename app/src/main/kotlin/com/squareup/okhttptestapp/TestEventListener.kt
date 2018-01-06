@@ -1,7 +1,13 @@
 package com.squareup.okhttptestapp
 
 import android.util.Log
-import okhttp3.*
+import okhttp3.Call
+import okhttp3.Connection
+import okhttp3.EventListener
+import okhttp3.Handshake
+import okhttp3.Protocol
+import okhttp3.Request
+import okhttp3.Response
 import java.io.IOException
 import java.net.InetAddress
 import java.net.InetSocketAddress

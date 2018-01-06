@@ -1,6 +1,5 @@
 package com.squareup.okhttptestapp.spec
 
-import android.graphics.Color
 import com.facebook.litho.Column
 import com.facebook.litho.ComponentContext
 import com.facebook.litho.ComponentLayout
@@ -19,21 +18,15 @@ object MainComponentSpec {
   fun onCreateLayout(
       c: ComponentContext, @Prop initialUrl: String, @Prop executeListener: (Request) -> Unit,
       @Prop results: List<ResponseModel>): ComponentLayout {
-    println(results)
-
-    val list = RecyclerCollectionComponent
-        .create(c)
-        .section(
-            ResultsListSection.create(SectionContext(c)).results(results).build())
-        .disablePTR(true)
-        .build()
-
     return Column.create(c)
         .paddingDip(YogaEdge.ALL, 16f)
-        .backgroundColor(Color.WHITE)
         .child(QueryComponent.create(c).initialUrl(initialUrl).executeListener(
-            executeListener).build())
-        .child(list)
+            executeListener).flexGrow(0f))
+        .child(RecyclerCollectionComponent
+            .create(c)
+            .section(
+                ResultsListSection.create(SectionContext(c)).results(results).build())
+            .disablePTR(true).flexGrow(1f))
         .build()
   }
 }

@@ -10,7 +10,6 @@ import com.facebook.litho.sections.annotations.OnCreateChildren
 import com.facebook.litho.sections.common.DataDiffSection
 import com.facebook.litho.sections.common.OnCheckIsSameItemEvent
 import com.facebook.litho.sections.common.RenderEvent
-import com.facebook.litho.sections.common.SingleComponentSection
 import com.facebook.litho.widget.ComponentRenderInfo
 import com.facebook.litho.widget.RenderInfo
 import com.squareup.okhttptestapp.model.ResponseModel
@@ -35,7 +34,7 @@ object ResultsListSectionSpec {
       c: SectionContext,
       @FromEvent model: ResponseModel): RenderInfo =
       ComponentRenderInfo.create()
-          .component(ResultComponent.create(c).text(model.body).build())
+          .component(ResultComponent.create(c).result(model).build())
           .build()
 
   @OnEvent(OnCheckIsSameItemEvent::class)

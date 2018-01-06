@@ -13,7 +13,7 @@ import okhttp3.Response
 
 class MainActivity : Activity() {
   lateinit var c: SectionContext
-  val results = mutableListOf<ResponseModel>(ResponseModel(-1, "Hello", null))
+  val results = mutableListOf<ResponseModel>()
 
   private lateinit var lithoView: LithoView
 
@@ -27,7 +27,8 @@ class MainActivity : Activity() {
   }
 
   private fun view() = MainComponent.create(c).initialUrl(
-      "https://nghttp2.org/httpbin/get").executeListener({ executeCall(it) }).results(results).build()
+      "https://nghttp2.org/httpbin/get").executeListener({ executeCall(it) }).results(
+      results.toList()).build()
 
   private var count: Int = 0
 
@@ -35,11 +36,21 @@ class MainActivity : Activity() {
     Log.i(TAG, request.url().toString())
 
     async {
-      var response = (application as OkHttpTestApp).networkClients.testClient.execute(request)
-      results.add(ResponseModel(count++, response.body()!!.string(), response))
+      results.add(responseModel(testClient().newCall(request).await()))
       lithoView.setComponentAsync(view())
     }
   }
+
+  private fun responseModel(
+      response: Response): ResponseModel {
+    if (response.isSuccessful) {
+      return ResponseModel(count++, response.body()?.string(), response)
+    } else {
+      return ResponseModel(count++, null, response)
+    }
+  }
+
+  private fun testClient() = (application as OkHttpTestApp).networkClients.testClient
 
   companion object {
     var TAG = "MainActivity"
