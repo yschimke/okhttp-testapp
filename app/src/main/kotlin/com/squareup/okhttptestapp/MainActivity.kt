@@ -26,7 +26,7 @@ class MainActivity : Activity() {
   }
 
   private fun view() = MainComponent.create(c).initialUrl(
-      "https://nghttp2.org/httpbin/get").executeListener({ executeCall(it) }).results(
+      "https://nghttp2.org/httpbin/delay/1").executeListener({ executeCall(it) }).results(
       results.toList()).build()
 
   private fun executeCall(request: Request) {
