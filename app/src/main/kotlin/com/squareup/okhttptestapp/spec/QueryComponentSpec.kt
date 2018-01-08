@@ -1,24 +1,22 @@
 package com.squareup.okhttptestapp.spec
 
 import android.text.InputType
-import android.util.Log
 import com.facebook.litho.ComponentContext
 import com.facebook.litho.ComponentLayout
-import com.facebook.litho.EventHandler
 import com.facebook.litho.Row
 import com.facebook.litho.StateValue
+import com.facebook.litho.annotations.FromEvent
 import com.facebook.litho.annotations.LayoutSpec
 import com.facebook.litho.annotations.OnCreateInitialState
 import com.facebook.litho.annotations.OnCreateLayout
+import com.facebook.litho.annotations.OnEvent
+import com.facebook.litho.annotations.OnUpdateState
+import com.facebook.litho.annotations.Param
 import com.facebook.litho.annotations.Prop
 import com.facebook.litho.annotations.State
 import com.facebook.litho.widget.EditText
-import okhttp3.Request
-import com.facebook.litho.annotations.OnUpdateState
-import com.facebook.litho.annotations.Param
-import com.facebook.litho.annotations.FromEvent
-import com.facebook.litho.annotations.OnEvent
 import com.facebook.litho.widget.TextChangedEvent
+import okhttp3.Request
 
 @LayoutSpec
 object QueryComponentSpec {

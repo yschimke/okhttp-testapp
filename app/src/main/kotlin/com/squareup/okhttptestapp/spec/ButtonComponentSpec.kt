@@ -1,6 +1,5 @@
 package com.squareup.okhttptestapp.spec
 
-import android.util.Log
 import android.widget.Button
 import com.facebook.litho.ComponentContext
 import com.facebook.litho.annotations.MountSpec

@@ -41,5 +41,5 @@ object ResultsListSectionSpec {
   fun isSameItem(
       c: SectionContext,
       @FromEvent previousItem: ResponseModel,
-      @FromEvent nextItem: ResponseModel): Boolean = previousItem.requestNum == nextItem.requestNum
+      @FromEvent nextItem: ResponseModel): Boolean = previousItem.call === nextItem.call
 }

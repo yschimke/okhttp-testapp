@@ -9,7 +9,6 @@ import com.squareup.okhttptestapp.model.ResponseModel
 import com.squareup.okhttptestapp.spec.MainComponent
 import kotlinx.coroutines.experimental.async
 import okhttp3.Request
-import okhttp3.Response
 
 class MainActivity : Activity() {
   lateinit var c: SectionContext
@@ -30,23 +29,12 @@ class MainActivity : Activity() {
       "https://nghttp2.org/httpbin/get").executeListener({ executeCall(it) }).results(
       results.toList()).build()
 
-  private var count: Int = 0
-
   private fun executeCall(request: Request) {
     Log.i(TAG, request.url().toString())
 
     async {
-      results.add(responseModel(testClient().newCall(request).await()))
+      results.add(ResponseModel(testClient().newCall(request)))
       lithoView.setComponentAsync(view())
-    }
-  }
-
-  private fun responseModel(
-      response: Response): ResponseModel {
-    if (response.isSuccessful) {
-      return ResponseModel(count++, response.body()?.string(), response)
-    } else {
-      return ResponseModel(count++, null, response)
     }
   }
 
