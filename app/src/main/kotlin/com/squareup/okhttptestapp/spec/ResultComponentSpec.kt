@@ -1,7 +1,5 @@
 package com.squareup.okhttptestapp.spec
 
-import android.util.Log
-import com.facebook.litho.Column
 import com.facebook.litho.ComponentContext
 import com.facebook.litho.ComponentLayout
 import com.facebook.litho.StateValue
@@ -12,7 +10,10 @@ import com.facebook.litho.annotations.OnUpdateState
 import com.facebook.litho.annotations.Param
 import com.facebook.litho.annotations.Prop
 import com.facebook.litho.annotations.State
-import com.facebook.litho.widget.Text
+import com.makeramen.litho.children
+import com.makeramen.litho.column
+import com.makeramen.litho.layout
+import com.makeramen.litho.text
 import com.squareup.okhttptestapp.model.ResponseModel
 import okhttp3.Call
 import okhttp3.Callback
@@ -28,12 +29,10 @@ object ResultComponentSpec {
 
     result.call.enqueue(object : Callback {
       override fun onFailure(call: Call, e: IOException) {
-        Log.i("ResultComponent", "Request failed", e)
         ResultComponent.updateResponseAsync(c, e.toString())
       }
 
       override fun onResponse(call: Call, response: Response) {
-        Log.i("ResultComponent", "s")
         ResultComponent.updateResponseAsync(c, response.body()!!.string())
       }
     })
@@ -46,12 +45,17 @@ object ResultComponentSpec {
 
   @OnCreateLayout
   fun onCreateLayout(
-      c: ComponentContext, @Prop result: ResponseModel, @State responseBody: String): ComponentLayout {
-    val text = resultText(result, responseBody)
-    return Column.create(c)
-        .child(Text.create(c).text(text).textSizeSp(12f).build())
-        .build()
-  }
+      c: ComponentContext, @Prop result: ResponseModel, @State responseBody: String): ComponentLayout =
+      layout {
+        column(c) {
+          children {
+            text(c) {
+              text(resultText(result, responseBody))
+              textSizeSp(12f)
+            }
+          }
+        }
+      }
 
   private fun resultText(result: ResponseModel,
       responseBody: String) =
