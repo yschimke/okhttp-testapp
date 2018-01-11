@@ -62,6 +62,7 @@ dependencies {
   implementation 'com.facebook.stetho:stetho:1.5.0'
   implementation 'com.facebook.stetho:stetho-okhttp3:1.5.0'
   implementation 'com.squareup.retrofit2:retrofit:2.3.0'
+  implementation 'com.jakewharton:process-phoenix:2.0.0'
   implementation 'com.github.franmontiel:PersistentCookieJar:v1.0.1'    // Anko Commons
   implementation "org.jetbrains.anko:anko-commons:$anko_version"
   // Anko Layouts
