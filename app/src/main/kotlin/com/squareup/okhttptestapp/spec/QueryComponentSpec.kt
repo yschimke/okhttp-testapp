@@ -52,8 +52,8 @@ object QueryComponentSpec {
             row(c) {
               children {
                 component(c, CheckboxComponent::create) {
-                  label("GCM")
-                  checked(requestOptions.gcm)
+                  label("GMS")
+                  checked(requestOptions.gms)
                   widthDip(80f)
                   heightDip(40f)
                   checkedListener {
@@ -76,14 +76,12 @@ object QueryComponentSpec {
 
   @OnUpdateState
   fun updateUrl(requestOptions: StateValue<RequestOptions>, @Param updatedText: String) {
-    Log.i("QueryComponentSpec", "url $updatedText")
     requestOptions.set(requestOptions.get().copy(url = updatedText))
   }
 
   @OnUpdateState
-  fun updateGcm(requestOptions: StateValue<RequestOptions>, @Param updatedGcm: Boolean) {
-    Log.i("QueryComponentSpec", "gcm $updatedGcm")
-    requestOptions.set(requestOptions.get().copy(gcm = updatedGcm))
+  fun updateGcm(requestOptions: StateValue<RequestOptions>, @Param updatedGms: Boolean) {
+    requestOptions.set(requestOptions.get().copy(gms = updatedGms))
   }
 
   @OnEvent(TextChangedEvent::class)
