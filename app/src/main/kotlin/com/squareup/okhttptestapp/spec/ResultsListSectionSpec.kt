@@ -12,15 +12,19 @@ import com.facebook.litho.sections.common.OnCheckIsSameItemEvent
 import com.facebook.litho.sections.common.RenderEvent
 import com.facebook.litho.widget.ComponentRenderInfo
 import com.facebook.litho.widget.RenderInfo
+import com.facebook.litho.widget.Text
+import com.squareup.okhttptestapp.model.AppEvent
+import com.squareup.okhttptestapp.model.GmsInstall
 import com.squareup.okhttptestapp.model.ResponseModel
+import com.squareup.okhttptestapp.model.SystemState
 
 @GroupSectionSpec
 object ResultsListSectionSpec {
   @OnCreateChildren
-  fun onCreateChildren(c: SectionContext, @Prop results: List<ResponseModel>): Children {
+  fun onCreateChildren(c: SectionContext, @Prop results: List<AppEvent>): Children {
     return Children.create()
         .child(
-            DataDiffSection.create<ResponseModel>(c)
+            DataDiffSection.create<AppEvent>(c)
                 .data(results)
                 .renderEventHandler(
                     ResultsListSection.render(c))
@@ -32,14 +36,24 @@ object ResultsListSectionSpec {
   @OnEvent(RenderEvent::class)
   fun render(
       c: SectionContext,
-      @FromEvent model: ResponseModel): RenderInfo =
-      ComponentRenderInfo.create()
-          .component(ResultComponent.create(c).result(model).build())
-          .build()
+      @FromEvent model: AppEvent): RenderInfo {
+    val component = when (model) {
+      is ResponseModel -> ResultComponent.create(c).result(model).build()
+      is GmsInstall -> textRow(c, "GMS Provider Installed")
+      is SystemState -> textRow(c, "System State: ${model.state}")
+    }
+
+    return ComponentRenderInfo.create().component(component).build()
+  }
+
+  private fun textRow(c: SectionContext, text: String) = Text.create(c).text(text).textSizeSp(
+      12f).build()
 
   @OnEvent(OnCheckIsSameItemEvent::class)
   fun isSameItem(
       c: SectionContext,
-      @FromEvent previousItem: ResponseModel,
-      @FromEvent nextItem: ResponseModel): Boolean = previousItem.call === nextItem.call
+      @FromEvent previousItem: AppEvent,
+      @FromEvent nextItem: AppEvent): Boolean {
+    return previousItem == nextItem
+  }
 }

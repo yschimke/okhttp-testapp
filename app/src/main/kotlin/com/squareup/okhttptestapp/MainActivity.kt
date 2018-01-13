@@ -13,14 +13,19 @@ import com.google.android.gms.common.GooglePlayServicesNotAvailableException
 import com.google.android.gms.common.GooglePlayServicesRepairableException
 import com.google.android.gms.security.ProviderInstaller
 import com.jakewharton.processphoenix.ProcessPhoenix
+import com.squareup.okhttptestapp.model.AppEvent
+import com.squareup.okhttptestapp.model.GmsInstall
+import com.squareup.okhttptestapp.model.RequestOptions
 import com.squareup.okhttptestapp.model.ResponseModel
 import com.squareup.okhttptestapp.spec.MainComponent
 import kotlinx.coroutines.experimental.async
 import okhttp3.Request
+import java.security.Security
+import javax.net.ssl.SSLContext
 
 class MainActivity : Activity() {
   lateinit var c: SectionContext
-  val results = mutableListOf<ResponseModel>()
+  val results = mutableListOf<AppEvent>()
 
   private lateinit var lithoView: LithoView
 
@@ -92,15 +97,22 @@ class MainActivity : Activity() {
   }
 
   fun installGms() {
+    Log.i(TAG, "gms " + Security.getProvider("GmsCore_OpenSSL"))
+    Log.i(TAG, "android " + Security.getProvider("AndroidOpenSSL"))
+    Log.i(TAG, "default " + SSLContext.getDefault().provider)
+
     try {
       Log.i(TAG, "Installing GMS Provider")
       ProviderInstaller.installIfNeeded(this)
       gmsInstalled = true
+      results.add(GmsInstall())
     } catch (e: GooglePlayServicesRepairableException) {
       GoogleApiAvailability.getInstance().showErrorNotification(this, e.connectionStatusCode)
     } catch (e: GooglePlayServicesNotAvailableException) {
       TODO()
     }
+    Log.i(TAG, "gms " + Security.getProvider("GmsCore_OpenSSL"))
+    Log.i(TAG, "default " + SSLContext.getDefault().provider)
   }
 
   private fun restartAndRun(): Nothing {

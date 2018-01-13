@@ -1,7 +1,6 @@
 package com.squareup.okhttptestapp.spec
 
 import android.text.InputType
-import android.util.Log
 import com.facebook.litho.ComponentContext
 import com.facebook.litho.ComponentLayout
 import com.facebook.litho.StateValue
@@ -21,7 +20,7 @@ import com.makeramen.litho.component
 import com.makeramen.litho.editText
 import com.makeramen.litho.layout
 import com.makeramen.litho.row
-import com.squareup.okhttptestapp.RequestOptions
+import com.squareup.okhttptestapp.model.RequestOptions
 
 @LayoutSpec
 object QueryComponentSpec {

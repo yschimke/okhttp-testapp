@@ -27,15 +27,17 @@ object ResultComponentSpec {
       responseBody: StateValue<String>, @Prop result: ResponseModel) {
     responseBody.set("Executing...")
 
-    result.call.enqueue(object : Callback {
-      override fun onFailure(call: Call, e: IOException) {
-        ResultComponent.updateResponseAsync(c, e.toString())
-      }
+    if (!result.call.isExecuted) {
+      result.call.enqueue(object : Callback {
+        override fun onFailure(call: Call, e: IOException) {
+          ResultComponent.updateResponseAsync(c, e.toString())
+        }
 
-      override fun onResponse(call: Call, response: Response) {
-        ResultComponent.updateResponseAsync(c, response.body()!!.string())
-      }
-    })
+        override fun onResponse(call: Call, response: Response) {
+          ResultComponent.updateResponseAsync(c, response.body()!!.string())
+        }
+      })
+    }
   }
 
   @OnUpdateState

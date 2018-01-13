@@ -12,8 +12,8 @@ import com.makeramen.litho.children
 import com.makeramen.litho.column
 import com.makeramen.litho.component
 import com.makeramen.litho.layout
-import com.squareup.okhttptestapp.RequestOptions
-import com.squareup.okhttptestapp.model.ResponseModel
+import com.squareup.okhttptestapp.model.AppEvent
+import com.squareup.okhttptestapp.model.RequestOptions
 
 @LayoutSpec
 object MainComponentSpec {
@@ -22,7 +22,7 @@ object MainComponentSpec {
       c: ComponentContext,
       @Prop requestOptions: RequestOptions,
       @Prop executeListener: (RequestOptions) -> Unit,
-      @Prop results: List<ResponseModel>): ComponentLayout = layout {
+      @Prop results: List<AppEvent>): ComponentLayout = layout {
     column(c) {
       paddingDip(YogaEdge.ALL, 8f)
       children {
