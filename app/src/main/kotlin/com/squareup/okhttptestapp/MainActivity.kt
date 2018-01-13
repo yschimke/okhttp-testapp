@@ -168,7 +168,7 @@ class MainActivity : Activity() {
       ProviderInstaller.installIfNeeded(this)
       results.add(GmsInstall())
     } catch (e: GooglePlayServicesRepairableException) {
-      results.add(GmsInstall(e.toString()))
+      results.add(GmsInstall("Repairable: " + e.message))
       GoogleApiAvailability.getInstance().showErrorNotification(this, e.connectionStatusCode)
     } catch (e: GooglePlayServicesNotAvailableException) {
       results.add(GmsInstall("Google Play unavailable"))
