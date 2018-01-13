@@ -22,12 +22,14 @@ object MainComponentSpec {
       c: ComponentContext,
       @Prop requestOptions: RequestOptions,
       @Prop executeListener: (RequestOptions) -> Unit,
+      @Prop gmsAvailable: Boolean,
       @Prop results: List<AppEvent>): ComponentLayout = layout {
     column(c) {
       paddingDip(YogaEdge.ALL, 8f)
       children {
         component(c, QueryComponent::create) {
           initialRequestOptions(requestOptions)
+          gmsAvailable(gmsAvailable)
           executeListener(executeListener)
           flexGrow(0f)
         }

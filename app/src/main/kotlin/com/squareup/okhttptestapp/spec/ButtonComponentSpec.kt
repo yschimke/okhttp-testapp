@@ -6,7 +6,6 @@ import com.facebook.litho.annotations.MountSpec
 import com.facebook.litho.annotations.OnCreateMountContent
 import com.facebook.litho.annotations.OnMount
 import com.facebook.litho.annotations.Prop
-import org.jetbrains.anko.sdk25.coroutines.onClick
 
 @MountSpec
 object ButtonComponentSpec {
@@ -20,6 +19,6 @@ object ButtonComponentSpec {
       @Prop label: String,
       @Prop executeListener: () -> Unit) {
     button.text = label
-    button.onClick { executeListener() }
+    button.setOnClickListener { executeListener() }
   }
 }

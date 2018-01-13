@@ -33,7 +33,7 @@ object QueryComponentSpec {
 
   @OnCreateLayout
   fun onCreateLayout(
-      c: ComponentContext, @State requestOptions: RequestOptions, @Prop executeListener: (RequestOptions) -> Unit): ComponentLayout =
+      c: ComponentContext, @State requestOptions: RequestOptions, @Prop gmsAvailable: Boolean, @Prop executeListener: (RequestOptions) -> Unit): ComponentLayout =
       layout {
         column(c) {
           children {
@@ -52,9 +52,10 @@ object QueryComponentSpec {
               children {
                 component(c, CheckboxComponent::create) {
                   label("GMS")
-                  checked(requestOptions.gms)
+                  checked(gmsAvailable && requestOptions.gms)
                   widthDip(80f)
                   heightDip(40f)
+                  available(gmsAvailable)
                   checkedListener {
                     QueryComponent.updateGcm(c, it)
                   }

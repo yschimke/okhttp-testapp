@@ -3,11 +3,12 @@ package com.squareup.okhttptestapp
 import android.app.Application
 import android.os.StrictMode
 import android.support.v4.app.Fragment
+import com.bugsnag.android.Bugsnag
 import com.facebook.soloader.SoLoader
 import com.facebook.stetho.Stetho
 import com.squareup.okhttptestapp.dumper.TestRequestDumperPlugin
+import kotlinx.coroutines.experimental.async
 import okhttp3.OkHttpClient
-import org.jetbrains.anko.doAsync
 
 lateinit var application: OkHttpTestApp
 
@@ -15,11 +16,11 @@ class OkHttpTestApp : Application() {
   override fun onCreate() {
     super.onCreate()
 
-//    Bugsnag.init(applicationContext)
+    Bugsnag.init(applicationContext)
 
     strictMode()
 
-    doAsync {
+    async {
       Stetho.initialize(Stetho.newInitializerBuilder(applicationContext)
           .enableDumpapp {
             Stetho.DefaultDumperPluginsBuilder(applicationContext)

@@ -16,7 +16,6 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException
 import com.google.android.gms.common.GooglePlayServicesRepairableException
 import com.google.android.gms.security.ProviderInstaller
-import com.jakewharton.processphoenix.ProcessPhoenix
 import com.squareup.okhttptestapp.model.AppEvent
 import com.squareup.okhttptestapp.model.ClientCreated
 import com.squareup.okhttptestapp.model.GmsInstall
@@ -28,6 +27,7 @@ import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
+import java.security.Provider
 import java.security.Security
 import javax.net.ssl.SSLContext
 
@@ -41,10 +41,10 @@ class MainActivity : Activity() {
 
   private lateinit var sharedPrefs: SharedPreferences
 
-  private var gmsInstalled = false
-
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+    loadGmsProvider()
 
     sharedPrefs = this.getSharedPreferences("com.squareup.okhttptestapp", Context.MODE_PRIVATE)
 
@@ -54,16 +54,6 @@ class MainActivity : Activity() {
 
     lithoView = LithoView.create(this, view(requestOptions))
     setContentView(lithoView)
-
-    if (runInitial()) {
-      executeCall(requestOptions)
-    }
-  }
-
-  private fun runInitial(): Boolean {
-    val run = ProcessPhoenix.isPhoenixProcess(this) || intent.hasCategory(
-        "android.intent.category.DEFAULT")
-    return run
   }
 
   private fun readQueryFromSharedPreferences(): RequestOptions {
@@ -83,6 +73,7 @@ class MainActivity : Activity() {
       MainComponent.create(c)
           .requestOptions(requestOptions)
           .executeListener({ executeCall(it) })
+          .gmsAvailable(gmsProvider != null)
           .results(results.toList())
           .build()
 
@@ -91,23 +82,35 @@ class MainActivity : Activity() {
 
     saveQueryToSharedPrefs()
 
-    if (gmsInstalled && !requestOptions.gms) {
-      restartAndRun()
-    } else if (!gmsInstalled && requestOptions.gms) {
-      installGms()
-      okHttpApplication().okhttpClient = null
-    }
+    setupProviders()
 
     if (okHttpApplication().okhttpClient == null) {
-      val newClient = createClient()
-
-      okHttpApplication().okhttpClient = newClient
+      okHttpApplication().okhttpClient = createClient()
     }
 
     async {
       val request = Request.Builder().url(requestOptions.url).build()
       results.add(ResponseModel(okHttpApplication().okhttpClient!!.newCall(request)))
       lithoView.setComponentAsync(view(requestOptions))
+    }
+  }
+
+
+  private fun setupProviders() {
+    if (requestOptions.gms) {
+      if (gmsProvider != null && Security.getProviders().first().name != "GmsCore_OpenSSL") {
+        Security.insertProviderAt(gmsProvider, 0)
+        SSLContext.setDefault(SSLContext.getInstance("Default", "GmsCore_OpenSSL"))
+        okHttpApplication().okhttpClient = null
+      } else {
+        Log.i(TAG, "No GMS provider to install")
+      }
+    } else {
+      if (Security.getProvider("GmsCore_OpenSSL") != null) {
+        Security.removeProvider("GmsCore_OpenSSL")
+        SSLContext.setDefault(SSLContext.getInstance("Default"))
+        okHttpApplication().okhttpClient = null
+      }
     }
   }
 
@@ -127,29 +130,24 @@ class MainActivity : Activity() {
     return newClient
   }
 
-  fun installGms() {
+  private var gmsProvider: Provider? = null
+
+  private fun loadGmsProvider() {
     try {
       ProviderInstaller.installIfNeeded(this)
-      gmsInstalled = true
       results.add(GmsInstall())
     } catch (e: GooglePlayServicesRepairableException) {
       results.add(GmsInstall(e.toString()))
       GoogleApiAvailability.getInstance().showErrorNotification(this, e.connectionStatusCode)
     } catch (e: GooglePlayServicesNotAvailableException) {
-      results.add(GmsInstall(e.toString()))
+      results.add(GmsInstall("Google Play unavailable"))
     }
 
     Security.getProviders().forEach {
       Log.i(TAG, "" + it.name + " " + it.javaClass)
     }
 
-    val s = SSLContext.getDefault().provider
-    Log.i(TAG, "" + s)
-  }
-
-  private fun restartAndRun(): Nothing {
-    ProcessPhoenix.triggerRebirth(applicationContext)
-    throw IllegalStateException()
+    gmsProvider = Security.getProvider("GmsCore_OpenSSL");
   }
 
   private fun okHttpApplication() = (application as OkHttpTestApp)

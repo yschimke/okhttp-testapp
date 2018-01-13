@@ -6,10 +6,13 @@ import com.facebook.litho.annotations.MountSpec
 import com.facebook.litho.annotations.OnCreateMountContent
 import com.facebook.litho.annotations.OnMount
 import com.facebook.litho.annotations.Prop
-import org.jetbrains.anko.sdk25.coroutines.onCheckedChange
+import com.facebook.litho.annotations.PropDefault
 
 @MountSpec
 object CheckboxComponentSpec {
+  @PropDefault @JvmField
+  val available = true
+
   @OnCreateMountContent
   fun onCreateMountContent(c: ComponentContext): CheckBox = CheckBox(c)
 
@@ -19,10 +22,12 @@ object CheckboxComponentSpec {
       checkbox: CheckBox,
       @Prop label: String,
       @Prop checked: Boolean,
+      @Prop(optional = true) available: Boolean,
       @Prop checkedListener: (Boolean) -> Unit) {
     checkbox.text = label
     checkbox.isChecked = checked
-    checkbox.onCheckedChange { _, isChecked ->
+    checkbox.isEnabled = available
+    checkbox.setOnCheckedChangeListener { _, isChecked ->
       checkedListener(isChecked)
     }
   }

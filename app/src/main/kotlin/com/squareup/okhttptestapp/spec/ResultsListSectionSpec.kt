@@ -44,7 +44,7 @@ object ResultsListSectionSpec {
       @FromEvent index: Int): RenderInfo {
     val component = when (model) {
       is ResponseModel -> ResultComponent.create(c).result(model)
-      is GmsInstall -> textRow(c, "GMS Provider Installed")
+      is GmsInstall -> textRow(c, "GMS Provider: ${model.error ?: "installed"}")
       is SystemState -> textRow(c, "System State: ${model.state}")
       is ClientCreated -> textRow(c, "Client: ${model.descripton}")
     }
