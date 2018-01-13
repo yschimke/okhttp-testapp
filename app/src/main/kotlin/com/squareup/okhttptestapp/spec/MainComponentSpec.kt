@@ -32,8 +32,9 @@ object MainComponentSpec {
           flexGrow(0f)
         }
         component(c, RecyclerCollectionComponent::create) {
-          section(ResultsListSection.create(SectionContext(c)).results(results)).disablePTR(
-              true).flexGrow(1f)
+          section(ResultsListSection.create(SectionContext(c)).results(results))
+          disablePTR(true)
+          flexGrow(1f)
         }
       }
     }

@@ -8,13 +8,14 @@ import okhttp3.Request
 
 class TestRequestDumperPlugin(val context: OkHttpTestApp) : DumperPlugin {
   override fun dump(dumpContext: DumperContext) {
-    val testClient = context.networkClients.testClient
+    // TODO update UI also
+    val testClient = context.okhttpClient
 
     val command = dumpContext.argsAsList.take(1).firstOrNull()?.toUpperCase()
     val rest = dumpContext.argsAsList.drop(1)
 
     when (command) {
-      "GET" -> get(testClient, dumpContext, rest)
+      "GET" -> get(testClient!!, dumpContext, rest)
       else -> usage(dumpContext)
     }
   }

@@ -6,21 +6,18 @@ import android.support.v4.app.Fragment
 import com.facebook.soloader.SoLoader
 import com.facebook.stetho.Stetho
 import com.squareup.okhttptestapp.dumper.TestRequestDumperPlugin
+import okhttp3.OkHttpClient
 import org.jetbrains.anko.doAsync
 
-var application: OkHttpTestApp? = null
+lateinit var application: OkHttpTestApp
 
 class OkHttpTestApp : Application() {
-  lateinit var networkClients: NetworkClients
-
   override fun onCreate() {
     super.onCreate()
 
 //    Bugsnag.init(applicationContext)
 
     strictMode()
-
-    networkClients = NetworkClients(this.applicationContext)
 
     doAsync {
       Stetho.initialize(Stetho.newInitializerBuilder(applicationContext)
@@ -54,6 +51,8 @@ class OkHttpTestApp : Application() {
           .build())
     }
   }
+
+  var okhttpClient: OkHttpClient? = null
 }
 
-fun Fragment.networkClients() = (this.activity!!.application as OkHttpTestApp).networkClients
+fun Fragment.networkClients() = (this.activity!!.application as OkHttpTestApp).okhttpClient

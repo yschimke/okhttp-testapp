@@ -8,18 +8,26 @@ import android.os.Bundle
 import android.util.Log
 import com.facebook.litho.LithoView
 import com.facebook.litho.sections.SectionContext
+import com.facebook.stetho.okhttp3.StethoInterceptor
+import com.franmontiel.persistentcookiejar.PersistentCookieJar
+import com.franmontiel.persistentcookiejar.cache.SetCookieCache
+import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException
 import com.google.android.gms.common.GooglePlayServicesRepairableException
 import com.google.android.gms.security.ProviderInstaller
 import com.jakewharton.processphoenix.ProcessPhoenix
 import com.squareup.okhttptestapp.model.AppEvent
+import com.squareup.okhttptestapp.model.ClientCreated
 import com.squareup.okhttptestapp.model.GmsInstall
 import com.squareup.okhttptestapp.model.RequestOptions
 import com.squareup.okhttptestapp.model.ResponseModel
 import com.squareup.okhttptestapp.spec.MainComponent
 import kotlinx.coroutines.experimental.async
+import okhttp3.Cache
+import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.io.File
 import java.security.Security
 import javax.net.ssl.SSLContext
 
@@ -87,32 +95,56 @@ class MainActivity : Activity() {
       restartAndRun()
     } else if (!gmsInstalled && requestOptions.gms) {
       installGms()
+      okHttpApplication().okhttpClient = null
+    }
+
+    if (okHttpApplication().okhttpClient == null) {
+      val newClient = createClient()
+
+      okHttpApplication().okhttpClient = newClient
     }
 
     async {
       val request = Request.Builder().url(requestOptions.url).build()
-      results.add(ResponseModel(testClient().newCall(request)))
+      results.add(ResponseModel(okHttpApplication().okhttpClient!!.newCall(request)))
       lithoView.setComponentAsync(view(requestOptions))
     }
   }
 
-  fun installGms() {
-    Log.i(TAG, "gms " + Security.getProvider("GmsCore_OpenSSL"))
-    Log.i(TAG, "android " + Security.getProvider("AndroidOpenSSL"))
-    Log.i(TAG, "default " + SSLContext.getDefault().provider)
+  private fun createClient(): OkHttpClient? {
+    val testBuilder = OkHttpClient.Builder()
+    testBuilder.addNetworkInterceptor(StethoInterceptor())
+    testBuilder.eventListener(TestEventListener())
 
+    testBuilder.cache(Cache(File(cacheDir, "HttpResponseCache"), 10 * 1024 * 1024))
+
+    testBuilder.cookieJar(
+        PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(this)))
+
+    val newClient = testBuilder.build()
+
+    results.add(ClientCreated("${SSLContext.getDefault().provider}\n${newClient.connectionSpecs()}"))
+    return newClient
+  }
+
+  fun installGms() {
     try {
-      Log.i(TAG, "Installing GMS Provider")
       ProviderInstaller.installIfNeeded(this)
       gmsInstalled = true
       results.add(GmsInstall())
     } catch (e: GooglePlayServicesRepairableException) {
+      results.add(GmsInstall(e.toString()))
       GoogleApiAvailability.getInstance().showErrorNotification(this, e.connectionStatusCode)
     } catch (e: GooglePlayServicesNotAvailableException) {
-      TODO()
+      results.add(GmsInstall(e.toString()))
     }
-    Log.i(TAG, "gms " + Security.getProvider("GmsCore_OpenSSL"))
-    Log.i(TAG, "default " + SSLContext.getDefault().provider)
+
+    Security.getProviders().forEach {
+      Log.i(TAG, "" + it.name + " " + it.javaClass)
+    }
+
+    val s = SSLContext.getDefault().provider
+    Log.i(TAG, "" + s)
   }
 
   private fun restartAndRun(): Nothing {
@@ -120,7 +152,7 @@ class MainActivity : Activity() {
     throw IllegalStateException()
   }
 
-  private fun testClient() = (application as OkHttpTestApp).networkClients.testClient
+  private fun okHttpApplication() = (application as OkHttpTestApp)
 
   companion object {
     var TAG = "MainActivity"

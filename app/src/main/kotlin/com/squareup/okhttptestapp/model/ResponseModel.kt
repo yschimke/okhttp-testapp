@@ -8,4 +8,6 @@ data class ResponseModel(val call: Call) : AppEvent()
 
 data class SystemState(val state: String) : AppEvent()
 
-data class GmsInstall(val success: Boolean = true) : AppEvent()
+data class GmsInstall(val error: String? = null) : AppEvent()
+
+data class ClientCreated(val descripton: String) : AppEvent()

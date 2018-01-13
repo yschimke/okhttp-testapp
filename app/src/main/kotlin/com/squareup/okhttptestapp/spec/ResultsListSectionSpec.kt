@@ -1,5 +1,7 @@
 package com.squareup.okhttptestapp.spec
 
+import android.graphics.Color
+import com.facebook.litho.Border
 import com.facebook.litho.annotations.FromEvent
 import com.facebook.litho.annotations.OnEvent
 import com.facebook.litho.annotations.Prop
@@ -13,7 +15,9 @@ import com.facebook.litho.sections.common.RenderEvent
 import com.facebook.litho.widget.ComponentRenderInfo
 import com.facebook.litho.widget.RenderInfo
 import com.facebook.litho.widget.Text
+import com.facebook.yoga.YogaEdge
 import com.squareup.okhttptestapp.model.AppEvent
+import com.squareup.okhttptestapp.model.ClientCreated
 import com.squareup.okhttptestapp.model.GmsInstall
 import com.squareup.okhttptestapp.model.ResponseModel
 import com.squareup.okhttptestapp.model.SystemState
@@ -36,18 +40,27 @@ object ResultsListSectionSpec {
   @OnEvent(RenderEvent::class)
   fun render(
       c: SectionContext,
-      @FromEvent model: AppEvent): RenderInfo {
+      @FromEvent model: AppEvent,
+      @FromEvent index: Int): RenderInfo {
     val component = when (model) {
-      is ResponseModel -> ResultComponent.create(c).result(model).build()
+      is ResponseModel -> ResultComponent.create(c).result(model)
       is GmsInstall -> textRow(c, "GMS Provider Installed")
       is SystemState -> textRow(c, "System State: ${model.state}")
+      is ClientCreated -> textRow(c, "Client: ${model.descripton}")
     }
 
-    return ComponentRenderInfo.create().component(component).build()
+    if (index > 0) {
+      component.border(Border.create(c).color(YogaEdge.TOP, Color.GRAY).widthDip(YogaEdge.TOP,
+          1).build())
+    }
+
+    component.marginDip(YogaEdge.ALL, 5f)
+
+    return ComponentRenderInfo.create().component(component.build()).build()
   }
 
   private fun textRow(c: SectionContext, text: String) = Text.create(c).text(text).textSizeSp(
-      12f).build()
+      12f)
 
   @OnEvent(OnCheckIsSameItemEvent::class)
   fun isSameItem(
