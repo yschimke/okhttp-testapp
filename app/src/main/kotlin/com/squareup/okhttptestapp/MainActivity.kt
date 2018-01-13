@@ -1,10 +1,15 @@
 package com.squareup.okhttptestapp
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+import android.os.Build
 import android.os.Bundle
+import android.support.annotation.RequiresApi
 import android.util.Log
 import com.facebook.litho.LithoView
 import com.facebook.litho.sections.SectionContext
@@ -19,6 +24,7 @@ import com.google.android.gms.security.ProviderInstaller
 import com.squareup.okhttptestapp.model.AppEvent
 import com.squareup.okhttptestapp.model.ClientCreated
 import com.squareup.okhttptestapp.model.GmsInstall
+import com.squareup.okhttptestapp.model.NetworkEvent
 import com.squareup.okhttptestapp.model.RequestOptions
 import com.squareup.okhttptestapp.model.ResponseModel
 import com.squareup.okhttptestapp.spec.MainComponent
@@ -63,10 +69,9 @@ class MainActivity : Activity() {
     return RequestOptions(gms, url)
   }
 
-  @SuppressLint("ApplySharedPref")
   private fun saveQueryToSharedPrefs() {
     sharedPrefs.edit().clear().putString("url", requestOptions.url).putBoolean("gms",
-        requestOptions.gms).commit()
+        requestOptions.gms).apply()
   }
 
   private fun view(requestOptions: RequestOptions) =
@@ -93,8 +98,33 @@ class MainActivity : Activity() {
       results.add(ResponseModel(okHttpApplication().okhttpClient!!.newCall(request)))
       lithoView.setComponentAsync(view(requestOptions))
     }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      registerNetworkListener()
+    }
   }
 
+  @RequiresApi(Build.VERSION_CODES.M)
+  fun registerNetworkListener() {
+    val connectivityManager = getSystemService(ConnectivityManager::class.java)
+    val request = NetworkRequest.Builder().addCapability(
+        NetworkCapabilities.NET_CAPABILITY_INTERNET).build()
+    val callback = object : ConnectivityManager.NetworkCallback() {
+      override fun onCapabilitiesChanged(network: Network?,
+          networkCapabilities: NetworkCapabilities?) {
+        results.add(NetworkEvent("capabilities $network $networkCapabilities"))
+      }
+
+      override fun onAvailable(network: Network?) {
+        results.add(NetworkEvent("available $network"))
+      }
+
+      override fun onUnavailable() {
+        results.add(NetworkEvent("unavailable"))
+      }
+    }
+    connectivityManager.registerNetworkCallback(request, callback)
+  }
 
   private fun setupProviders() {
     if (requestOptions.gms) {
@@ -126,7 +156,8 @@ class MainActivity : Activity() {
 
     val newClient = testBuilder.build()
 
-    results.add(ClientCreated("${SSLContext.getDefault().provider}\n${newClient.connectionSpecs()}"))
+    results.add(
+        ClientCreated("${SSLContext.getDefault().provider}\n${newClient.connectionSpecs()}"))
     return newClient
   }
 

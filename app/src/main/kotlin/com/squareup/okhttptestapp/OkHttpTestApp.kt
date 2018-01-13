@@ -2,7 +2,6 @@ package com.squareup.okhttptestapp
 
 import android.app.Application
 import android.os.StrictMode
-import android.support.v4.app.Fragment
 import com.bugsnag.android.Bugsnag
 import com.facebook.soloader.SoLoader
 import com.facebook.stetho.Stetho
@@ -55,5 +54,3 @@ class OkHttpTestApp : Application() {
 
   var okhttpClient: OkHttpClient? = null
 }
-
-fun Fragment.networkClients() = (this.activity!!.application as OkHttpTestApp).okhttpClient

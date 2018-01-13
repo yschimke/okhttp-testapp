@@ -19,6 +19,7 @@ import com.facebook.yoga.YogaEdge
 import com.squareup.okhttptestapp.model.AppEvent
 import com.squareup.okhttptestapp.model.ClientCreated
 import com.squareup.okhttptestapp.model.GmsInstall
+import com.squareup.okhttptestapp.model.NetworkEvent
 import com.squareup.okhttptestapp.model.ResponseModel
 import com.squareup.okhttptestapp.model.SystemState
 
@@ -46,7 +47,8 @@ object ResultsListSectionSpec {
       is ResponseModel -> ResultComponent.create(c).result(model)
       is GmsInstall -> textRow(c, "GMS Provider: ${model.error ?: "installed"}")
       is SystemState -> textRow(c, "System State: ${model.state}")
-      is ClientCreated -> textRow(c, "Client: ${model.descripton}")
+      is ClientCreated -> textRow(c, "Client: ${model.description}")
+      is NetworkEvent -> textRow(c, "Network: ${model.description}")
     }
 
     if (index > 0) {
