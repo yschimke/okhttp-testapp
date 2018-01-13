@@ -16,6 +16,7 @@ import com.facebook.litho.annotations.Prop
 import com.facebook.litho.annotations.State
 import com.facebook.litho.widget.TextChangedEvent
 import com.makeramen.litho.children
+import com.makeramen.litho.column
 import com.makeramen.litho.component
 import com.makeramen.litho.editText
 import com.makeramen.litho.layout
@@ -35,21 +36,38 @@ object QueryComponentSpec {
   fun onCreateLayout(
       c: ComponentContext, @State requestOptions: RequestOptions, @Prop executeListener: (RequestOptions) -> Unit): ComponentLayout =
       layout {
-        row(c) {
+        column(c) {
           children {
-            editText(c) {
-              text(requestOptions.url)
-              textSizeSp(14f)
-              isSingleLine(true)
-              inputType(InputType.TYPE_TEXT_VARIATION_URI).flexGrow(1f)
-              textChangedEventHandler(QueryComponent.onUrlChanged(c))
+            row(c) {
+              children {
+                editText(c) {
+                  text(requestOptions.url)
+                  textSizeSp(14f)
+                  isSingleLine(true)
+                  inputType(InputType.TYPE_TEXT_VARIATION_URI).flexGrow(1f)
+                  textChangedEventHandler(QueryComponent.onUrlChanged(c))
+                }
+              }
             }
-            component(c, ButtonComponent::create) {
-              label("Fetch")
-              widthDip(100f)
-              heightDip(40f)
-              executeListener {
-                executeListener(requestOptions)
+            row(c) {
+              children {
+                component(c, CheckboxComponent::create) {
+                  label("GCM")
+                  checked(requestOptions.gcm)
+                  widthDip(80f)
+                  heightDip(40f)
+                  checkedListener {
+                    QueryComponent.updateGcm(c, it)
+                  }
+                }
+                component(c, ButtonComponent::create) {
+                  label("Fetch")
+                  widthDip(100f)
+                  heightDip(40f)
+                  executeListener {
+                    executeListener(requestOptions)
+                  }
+                }
               }
             }
           }
@@ -57,16 +75,21 @@ object QueryComponentSpec {
       }
 
   @OnUpdateState
-  fun updateTextValue(requestOptions: StateValue<RequestOptions>, @Param updatedText: String) {
-    Log.i("QueryComponentSpec", "$updatedText")
-    val newRequestOptions = requestOptions.get().copy(url = updatedText)
-    requestOptions.set(newRequestOptions)
+  fun updateUrl(requestOptions: StateValue<RequestOptions>, @Param updatedText: String) {
+    Log.i("QueryComponentSpec", "url $updatedText")
+    requestOptions.set(requestOptions.get().copy(url = updatedText))
+  }
+
+  @OnUpdateState
+  fun updateGcm(requestOptions: StateValue<RequestOptions>, @Param updatedGcm: Boolean) {
+    Log.i("QueryComponentSpec", "gcm $updatedGcm")
+    requestOptions.set(requestOptions.get().copy(gcm = updatedGcm))
   }
 
   @OnEvent(TextChangedEvent::class)
   fun onUrlChanged(
       c: ComponentContext,
       @FromEvent text: String) {
-    QueryComponent.updateTextValue(c, text)
+    QueryComponent.updateUrl(c, text)
   }
 }

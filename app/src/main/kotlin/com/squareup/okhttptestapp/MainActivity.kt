@@ -8,7 +8,7 @@ import com.facebook.litho.sections.SectionContext
 import com.squareup.okhttptestapp.model.ResponseModel
 import com.squareup.okhttptestapp.spec.MainComponent
 import com.tinsuke.icekick.extension.freezeInstanceState
-import com.tinsuke.icekick.extension.serialState
+import com.tinsuke.icekick.extension.state
 import com.tinsuke.icekick.extension.unfreezeInstanceState
 import kotlinx.coroutines.experimental.async
 import okhttp3.Request
@@ -19,7 +19,7 @@ class MainActivity : Activity() {
 
   private lateinit var lithoView: LithoView
 
-  private var requestOptions: RequestOptions by serialState(RequestOptions(gcm = true, url = "https://nghttp2.org/httpbin/delay/1"))
+  private var requestOptions: RequestOptions? by state(RequestOptionsBundler)
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -28,7 +28,9 @@ class MainActivity : Activity() {
 
     unfreezeInstanceState(savedInstanceState)
 
-    lithoView = LithoView.create(this, view())
+    requestOptions = requestOptions ?: RequestOptions(true, "https://nghttp2.org/httpbin/delay/1")
+
+    lithoView = LithoView.create(this, view(requestOptions!!))
     setContentView(lithoView)
   }
 
@@ -37,7 +39,7 @@ class MainActivity : Activity() {
     freezeInstanceState(outState)
   }
 
-  private fun view() =
+  private fun view(requestOptions: RequestOptions) =
       MainComponent.create(c)
           .requestOptions(requestOptions)
           .executeListener({ executeCall(it) })
@@ -50,9 +52,9 @@ class MainActivity : Activity() {
     requestOptions = newRequestOptions
 
     async {
-      val request = Request.Builder().url(requestOptions.url).build()
+      val request = Request.Builder().url(requestOptions!!.url).build()
       results.add(ResponseModel(testClient().newCall(request)))
-      lithoView.setComponentAsync(view())
+      lithoView.setComponentAsync(view(requestOptions!!))
     }
   }
 

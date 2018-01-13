@@ -2,6 +2,11 @@ buildscript {
   repositories {
     google()
     jcenter()
+    maven { url "https://kotlin.bintray.com/kotlinx" }
+  }
+
+  dependencies {
+//    classpath "org.jetbrains.kotlinx:kotlinx-gradle-serialization-plugin:0.4"
   }
 }
 
@@ -9,6 +14,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
+//apply plugin: 'kotlinx-serialization'
 
 kapt {
   generateStubs = true
@@ -105,4 +111,5 @@ dependencies {
     exclude group: 'com.android.support', module: 'support-annotations'
   })
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+//  implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.4"
 }

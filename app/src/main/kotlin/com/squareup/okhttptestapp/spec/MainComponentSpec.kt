@@ -14,7 +14,6 @@ import com.makeramen.litho.component
 import com.makeramen.litho.layout
 import com.squareup.okhttptestapp.RequestOptions
 import com.squareup.okhttptestapp.model.ResponseModel
-import okhttp3.Request
 
 @LayoutSpec
 object MainComponentSpec {
