@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.ConnectivityManager
-import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
@@ -25,7 +24,6 @@ import com.google.android.gms.security.ProviderInstaller
 import com.squareup.okhttptestapp.model.AppEvent
 import com.squareup.okhttptestapp.model.ClientCreated
 import com.squareup.okhttptestapp.model.GmsInstall
-import com.squareup.okhttptestapp.model.NetworkEvent
 import com.squareup.okhttptestapp.model.RequestOptions
 import com.squareup.okhttptestapp.model.ResponseModel
 import com.squareup.okhttptestapp.network.NetworkListener
@@ -49,21 +47,29 @@ class MainActivity : Activity() {
 
   private lateinit var sharedPrefs: SharedPreferences
 
+  lateinit var okhttpClient: OkHttpClient
+
+  private var gmsProvider: Provider? = null
+
   private val scrollController = RecyclerCollectionEventsController()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    loadGmsProvider()
-
     sharedPrefs = this.getSharedPreferences("com.squareup.okhttptestapp", Context.MODE_PRIVATE)
-
-    c = SectionContext(this)
-
     requestOptions = readQueryFromSharedPreferences()
 
+    c = SectionContext(this)
     lithoView = LithoView.create(this, view(requestOptions))
     setContentView(lithoView)
+
+    loadGmsProvider()
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      registerNetworkListener()
+    }
+
+    okhttpClient = createClient()
   }
 
   private fun readQueryFromSharedPreferences(): RequestOptions {
@@ -87,24 +93,18 @@ class MainActivity : Activity() {
           .results(results.toList())
           .build()
 
-  private fun executeCall(newRequestOptions: RequestOptions) {
+  fun executeCall(newRequestOptions: RequestOptions) {
     requestOptions = newRequestOptions
 
     saveQueryToSharedPrefs()
 
-    setupProviders()
-
-    if (okHttpApplication().okhttpClient == null) {
-      okHttpApplication().okhttpClient = createClient()
+    if (setupProviders()) {
+      okhttpClient = createClient()
     }
 
     async {
       val request = Request.Builder().url(requestOptions.url).build()
-      show(ResponseModel(okHttpApplication().okhttpClient!!.newCall(request)))
-    }
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-      registerNetworkListener()
+      show(ResponseModel(okhttpClient.newCall(request)))
     }
   }
 
@@ -122,25 +122,25 @@ class MainActivity : Activity() {
     connectivityManager.registerNetworkCallback(request, NetworkListener(this))
   }
 
-  private fun setupProviders() {
+  private fun setupProviders(): Boolean {
     if (requestOptions.gms) {
-      if (gmsProvider != null && Security.getProviders().first().name != "GmsCore_OpenSSL") {
-        Security.insertProviderAt(gmsProvider, 0)
-        SSLContext.setDefault(SSLContext.getInstance("Default", "GmsCore_OpenSSL"))
-        okHttpApplication().okhttpClient = null
+      if (gmsProvider != null && SSLContext.getDefault().provider.name != "GmsCore_OpenSSL") {
+        SSLContext.setDefault(SSLContext.getInstance("Default", gmsProvider))
+        return true
       } else {
         Log.i(TAG, "No GMS provider to install")
       }
     } else {
-      if (Security.getProvider("GmsCore_OpenSSL") != null) {
-        Security.removeProvider("GmsCore_OpenSSL")
+      if (SSLContext.getDefault().provider.name == "GmsCore_OpenSSL") {
         SSLContext.setDefault(SSLContext.getInstance("Default"))
-        okHttpApplication().okhttpClient = null
+        return true
       }
     }
+
+    return false
   }
 
-  private fun createClient(): OkHttpClient? {
+  private fun createClient(): OkHttpClient {
     val testBuilder = OkHttpClient.Builder()
     testBuilder.addNetworkInterceptor(StethoInterceptor())
     testBuilder.eventListener(TestEventListener())
@@ -152,22 +152,19 @@ class MainActivity : Activity() {
 
     val newClient = testBuilder.build()
 
-    results.add(
-        ClientCreated("${SSLContext.getDefault().provider}\n${newClient.connectionSpecs()}"))
+    show(ClientCreated("${SSLContext.getDefault().provider}\n${newClient.connectionSpecs()}"))
     return newClient
   }
-
-  private var gmsProvider: Provider? = null
 
   private fun loadGmsProvider() {
     try {
       ProviderInstaller.installIfNeeded(this)
-      results.add(GmsInstall())
+      show(GmsInstall())
     } catch (e: GooglePlayServicesRepairableException) {
-      results.add(GmsInstall("Repairable: " + e.message))
+      show(GmsInstall("Repairable: " + e.message))
       GoogleApiAvailability.getInstance().showErrorNotification(this, e.connectionStatusCode)
     } catch (e: GooglePlayServicesNotAvailableException) {
-      results.add(GmsInstall("Google Play unavailable"))
+      show(GmsInstall("Google Play unavailable"))
     }
 
     Security.getProviders().forEach {
@@ -175,9 +172,9 @@ class MainActivity : Activity() {
     }
 
     gmsProvider = Security.getProvider("GmsCore_OpenSSL");
-  }
 
-  private fun okHttpApplication() = (application as OkHttpTestApp)
+    Security.removeProvider("GmsCore_OpenSSL")
+  }
 
   companion object {
     var TAG = "MainActivity"

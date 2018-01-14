@@ -2,30 +2,28 @@ package com.squareup.okhttptestapp.dumper
 
 import com.facebook.stetho.dumpapp.DumperContext
 import com.facebook.stetho.dumpapp.DumperPlugin
+import com.squareup.okhttptestapp.MainActivity
 import com.squareup.okhttptestapp.OkHttpTestApp
-import okhttp3.OkHttpClient
+import com.squareup.okhttptestapp.model.RequestOptions
 import okhttp3.Request
 
 class TestRequestDumperPlugin(val context: OkHttpTestApp) : DumperPlugin {
   override fun dump(dumpContext: DumperContext) {
-    // TODO update UI also
-    val testClient = context.okhttpClient
-
     val command = dumpContext.argsAsList.take(1).firstOrNull()?.toUpperCase()
     val rest = dumpContext.argsAsList.drop(1)
 
     when (command) {
-      "GET" -> get(testClient!!, dumpContext, rest)
+      "GET" -> get(context.mainActivity, dumpContext, rest)
       else -> usage(dumpContext)
     }
   }
 
-  private fun get(testClient: OkHttpClient, dumpContext: DumperContext, rest: List<String>) {
-    val result = testClient.newCall(Request.Builder().url(rest[0]).build()).execute()
+  private fun get(testClient: MainActivity, dumpContext: DumperContext, rest: List<String>) {
+    testClient.executeCall(RequestOptions(true, rest[0]))
 
-    result.use {
-      dumpContext.stderr.println(result)
-    }
+//    result.use {
+//      dumpContext.stderr.println(result)
+//    }
   }
 
   private fun usage(dumpContext: DumperContext) {
