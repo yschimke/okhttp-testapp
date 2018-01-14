@@ -7,6 +7,8 @@ import com.facebook.litho.annotations.OnCreateLayout
 import com.facebook.litho.annotations.Prop
 import com.facebook.litho.sections.SectionContext
 import com.facebook.litho.sections.widget.RecyclerCollectionComponent
+import com.facebook.litho.sections.widget.RecyclerCollectionEventsController
+import com.facebook.litho.widget.RecyclerEventsController
 import com.facebook.yoga.YogaEdge
 import com.makeramen.litho.children
 import com.makeramen.litho.column
@@ -23,7 +25,8 @@ object MainComponentSpec {
       @Prop requestOptions: RequestOptions,
       @Prop executeListener: (RequestOptions) -> Unit,
       @Prop gmsAvailable: Boolean,
-      @Prop results: List<AppEvent>): ComponentLayout = layout {
+      @Prop results: List<AppEvent>,
+      @Prop scrollController: RecyclerCollectionEventsController): ComponentLayout = layout {
     column(c) {
       paddingDip(YogaEdge.ALL, 8f)
       children {
@@ -37,6 +40,7 @@ object MainComponentSpec {
           section(ResultsListSection.create(SectionContext(c)).results(results))
           disablePTR(true)
           flexGrow(1f)
+          eventsController(scrollController)
         }
       }
     }

@@ -13,6 +13,7 @@ import android.support.annotation.RequiresApi
 import android.util.Log
 import com.facebook.litho.LithoView
 import com.facebook.litho.sections.SectionContext
+import com.facebook.litho.sections.widget.RecyclerCollectionEventsController
 import com.facebook.stetho.okhttp3.StethoInterceptor
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
@@ -47,6 +48,8 @@ class MainActivity : Activity() {
 
   private lateinit var sharedPrefs: SharedPreferences
 
+  private val scrollController = RecyclerCollectionEventsController()
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
@@ -79,6 +82,7 @@ class MainActivity : Activity() {
           .requestOptions(requestOptions)
           .executeListener({ executeCall(it) })
           .gmsAvailable(gmsProvider != null)
+          .scrollController(scrollController)
           .results(results.toList())
           .build()
 
@@ -95,13 +99,18 @@ class MainActivity : Activity() {
 
     async {
       val request = Request.Builder().url(requestOptions.url).build()
-      results.add(ResponseModel(okHttpApplication().okhttpClient!!.newCall(request)))
-      lithoView.setComponentAsync(view(requestOptions))
+      show(ResponseModel(okHttpApplication().okhttpClient!!.newCall(request)))
     }
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       registerNetworkListener()
     }
+  }
+
+  private fun show(model: AppEvent) {
+    results.add(model)
+    lithoView.setComponent(view(requestOptions))
+    scrollController.requestScrollToPosition(results.size, true)
   }
 
   @RequiresApi(Build.VERSION_CODES.M)
@@ -112,15 +121,15 @@ class MainActivity : Activity() {
     val callback = object : ConnectivityManager.NetworkCallback() {
       override fun onCapabilitiesChanged(network: Network?,
           networkCapabilities: NetworkCapabilities?) {
-        results.add(NetworkEvent("capabilities $network $networkCapabilities"))
+        show(NetworkEvent("capabilities $network $networkCapabilities"))
       }
 
       override fun onAvailable(network: Network?) {
-        results.add(NetworkEvent("available $network"))
+        show(NetworkEvent("available $network"))
       }
 
       override fun onUnavailable() {
-        results.add(NetworkEvent("unavailable"))
+        show(NetworkEvent("unavailable"))
       }
     }
     connectivityManager.registerNetworkCallback(request, callback)

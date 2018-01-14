@@ -13,6 +13,7 @@ import com.facebook.litho.sections.common.DataDiffSection
 import com.facebook.litho.sections.common.OnCheckIsSameItemEvent
 import com.facebook.litho.sections.common.RenderEvent
 import com.facebook.litho.widget.ComponentRenderInfo
+import com.facebook.litho.widget.RecyclerEventsController
 import com.facebook.litho.widget.RenderInfo
 import com.facebook.litho.widget.Text
 import com.facebook.yoga.YogaEdge
@@ -31,10 +32,8 @@ object ResultsListSectionSpec {
         .child(
             DataDiffSection.create<AppEvent>(c)
                 .data(results)
-                .renderEventHandler(
-                    ResultsListSection.render(c))
-                .onCheckIsSameItemEventHandler(
-                    ResultsListSection.isSameItem(c)))
+                .renderEventHandler(ResultsListSection.render(c))
+                .onCheckIsSameItemEventHandler(ResultsListSection.isSameItem(c)))
         .build()
   }
 
