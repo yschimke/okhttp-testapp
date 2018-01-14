@@ -4,6 +4,7 @@ import android.net.ConnectivityManager
 import android.net.LinkProperties
 import android.net.Network
 import android.net.NetworkCapabilities
+import android.util.Log
 import com.squareup.okhttptestapp.MainActivity
 import com.squareup.okhttptestapp.model.NetworkEvent
 
@@ -19,10 +20,12 @@ class NetworkListener(val main: MainActivity): ConnectivityManager.NetworkCallba
   private fun show(networkEvent: NetworkEvent) {
     val eventTime = System.currentTimeMillis()
 
-    if (lastEvent == null || lastEvent != networkEvent || eventTime - lastEventTime > 5) {
+    if (lastEvent == null || lastEvent != networkEvent || eventTime - lastEventTime > 50) {
       lastEvent = networkEvent
       lastEventTime = eventTime
       main.show(networkEvent)
+    } else {
+      Log.i("NetworkListener", "hide " + networkEvent)
     }
   }
 
