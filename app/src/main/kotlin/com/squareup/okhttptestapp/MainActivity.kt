@@ -28,6 +28,7 @@ import com.squareup.okhttptestapp.model.GmsInstall
 import com.squareup.okhttptestapp.model.NetworkEvent
 import com.squareup.okhttptestapp.model.RequestOptions
 import com.squareup.okhttptestapp.model.ResponseModel
+import com.squareup.okhttptestapp.network.NetworkListener
 import com.squareup.okhttptestapp.spec.MainComponent
 import kotlinx.coroutines.experimental.async
 import okhttp3.Cache
@@ -107,7 +108,7 @@ class MainActivity : Activity() {
     }
   }
 
-  private fun show(model: AppEvent) {
+  fun show(model: AppEvent) {
     results.add(model)
     lithoView.setComponent(view(requestOptions))
     scrollController.requestScrollToPosition(results.size, true)
@@ -118,21 +119,7 @@ class MainActivity : Activity() {
     val connectivityManager = getSystemService(ConnectivityManager::class.java)
     val request = NetworkRequest.Builder().addCapability(
         NetworkCapabilities.NET_CAPABILITY_INTERNET).build()
-    val callback = object : ConnectivityManager.NetworkCallback() {
-      override fun onCapabilitiesChanged(network: Network?,
-          networkCapabilities: NetworkCapabilities?) {
-        show(NetworkEvent("capabilities $network $networkCapabilities"))
-      }
-
-      override fun onAvailable(network: Network?) {
-        show(NetworkEvent("available $network"))
-      }
-
-      override fun onUnavailable() {
-        show(NetworkEvent("unavailable"))
-      }
-    }
-    connectivityManager.registerNetworkCallback(request, callback)
+    connectivityManager.registerNetworkCallback(request, NetworkListener(this))
   }
 
   private fun setupProviders() {
