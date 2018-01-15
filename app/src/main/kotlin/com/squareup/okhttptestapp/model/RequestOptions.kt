@@ -1,3 +1,3 @@
 package com.squareup.okhttptestapp.model
 
-data class RequestOptions(val gms: Boolean, val url: String)
+data class RequestOptions(val url: String)

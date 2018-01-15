@@ -33,7 +33,7 @@ object QueryComponentSpec {
 
   @OnCreateLayout
   fun onCreateLayout(
-      c: ComponentContext, @State requestOptions: RequestOptions, @Prop gmsAvailable: Boolean, @Prop executeListener: (RequestOptions) -> Unit): ComponentLayout =
+      c: ComponentContext, @State requestOptions: RequestOptions, @Prop executeListener: (RequestOptions) -> Unit): ComponentLayout =
       layout {
         column(c) {
           children {
@@ -50,16 +50,6 @@ object QueryComponentSpec {
             }
             row(c) {
               children {
-                component(c, CheckboxComponent::create) {
-                  label("GMS")
-                  checked(gmsAvailable && requestOptions.gms)
-                  widthDip(80f)
-                  heightDip(40f)
-                  available(gmsAvailable)
-                  checkedListener {
-                    QueryComponent.updateGcm(c, it)
-                  }
-                }
                 component(c, ButtonComponent::create) {
                   label("Fetch")
                   widthDip(100f)
@@ -77,11 +67,6 @@ object QueryComponentSpec {
   @OnUpdateState
   fun updateUrl(requestOptions: StateValue<RequestOptions>, @Param updatedText: String) {
     requestOptions.set(requestOptions.get().copy(url = updatedText))
-  }
-
-  @OnUpdateState
-  fun updateGcm(requestOptions: StateValue<RequestOptions>, @Param updatedGms: Boolean) {
-    requestOptions.set(requestOptions.get().copy(gms = updatedGms))
   }
 
   @OnEvent(TextChangedEvent::class)

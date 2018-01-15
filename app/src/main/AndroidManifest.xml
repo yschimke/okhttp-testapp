@@ -13,12 +13,6 @@
       android:theme="@style/AppTheme">
 
     <activity
-        android:name="com.jakewharton.processphoenix.ProcessPhoenix"
-        android:theme="@android:style/Theme.Translucent.NoTitleBar"
-        android:process=":phoenix"
-    />
-
-    <activity
         android:name=".MainActivity"
         android:label="@string/app_name"
         android:theme="@style/AppTheme.NoActionBar"

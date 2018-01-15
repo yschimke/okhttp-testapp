@@ -23,7 +23,9 @@ import com.google.android.gms.common.GooglePlayServicesRepairableException
 import com.google.android.gms.security.ProviderInstaller
 import com.squareup.okhttptestapp.model.AppEvent
 import com.squareup.okhttptestapp.model.ClientCreated
+import com.squareup.okhttptestapp.model.ClientOptions
 import com.squareup.okhttptestapp.model.GmsInstall
+import com.squareup.okhttptestapp.model.Modern
 import com.squareup.okhttptestapp.model.RequestOptions
 import com.squareup.okhttptestapp.model.ResponseModel
 import com.squareup.okhttptestapp.network.NetworkListener
@@ -45,9 +47,11 @@ class MainActivity : Activity() {
 
   private lateinit var requestOptions: RequestOptions
 
+  private lateinit var clientOptions: ClientOptions
+
   private lateinit var sharedPrefs: SharedPreferences
 
-  lateinit var okhttpClient: OkHttpClient
+  private lateinit var okhttpClient: OkHttpClient
 
   private var gmsProvider: Provider? = null
 
@@ -57,7 +61,7 @@ class MainActivity : Activity() {
     super.onCreate(savedInstanceState)
 
     sharedPrefs = this.getSharedPreferences("com.squareup.okhttptestapp", Context.MODE_PRIVATE)
-    requestOptions = readQueryFromSharedPreferences()
+    readQueryFromSharedPreferences()
 
     c = SectionContext(this)
     lithoView = LithoView.create(this, view(requestOptions))
@@ -72,35 +76,43 @@ class MainActivity : Activity() {
     okhttpClient = createClient()
   }
 
-  private fun readQueryFromSharedPreferences(): RequestOptions {
+  private fun readQueryFromSharedPreferences() {
     val gms = sharedPrefs.getBoolean("gms", true)
-    val url = sharedPrefs.getString("url", "https://www.howsmyssl.com/a/check")
+    clientOptions = ClientOptions(gms = gms, configSpec = Modern)
 
-    return RequestOptions(gms, url)
+    val url = sharedPrefs.getString("url", "https://www.howsmyssl.com/a/check")
+    requestOptions = RequestOptions(url)
   }
 
   private fun saveQueryToSharedPrefs() {
     sharedPrefs.edit().clear().putString("url", requestOptions.url).putBoolean("gms",
-        requestOptions.gms).apply()
+        clientOptions.gms).apply()
   }
 
   private fun view(requestOptions: RequestOptions) =
       MainComponent.create(c)
-          .requestOptions(requestOptions)
-          .executeListener({ executeCall(it) })
+          .initialClientOptions(clientOptions)
+          .initialRequestOptions(requestOptions)
+          .executeListener { executeCall(it) }
+          .configListener { updateClientOptions(it) }
           .gmsAvailable(gmsProvider != null)
           .scrollController(scrollController)
           .results(results.toList())
           .build()
 
+  private fun updateClientOptions(clientOptions: ClientOptions) {
+    this.clientOptions = clientOptions
+
+    setupProviders()
+    okhttpClient = createClient()
+
+    saveQueryToSharedPrefs()
+  }
+
   fun executeCall(newRequestOptions: RequestOptions) {
     requestOptions = newRequestOptions
 
     saveQueryToSharedPrefs()
-
-    if (setupProviders()) {
-      okhttpClient = createClient()
-    }
 
     async {
       val request = Request.Builder().url(requestOptions.url).build()
@@ -115,7 +127,7 @@ class MainActivity : Activity() {
   }
 
   @RequiresApi(Build.VERSION_CODES.M)
-  fun registerNetworkListener() {
+  private fun registerNetworkListener() {
     val connectivityManager = getSystemService(ConnectivityManager::class.java)
     val request = NetworkRequest.Builder().addCapability(
         NetworkCapabilities.NET_CAPABILITY_INTERNET).build()
@@ -123,7 +135,7 @@ class MainActivity : Activity() {
   }
 
   private fun setupProviders(): Boolean {
-    if (requestOptions.gms) {
+    if (clientOptions.gms) {
       if (gmsProvider != null && SSLContext.getDefault().provider.name != "GmsCore_OpenSSL") {
         SSLContext.setDefault(SSLContext.getInstance("Default", gmsProvider))
         return true
@@ -150,9 +162,10 @@ class MainActivity : Activity() {
     testBuilder.cookieJar(
         PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(this)))
 
-    val newClient = testBuilder.build()
+    val newClient = testBuilder.connectionSpecs(
+        listOf(clientOptions.configSpec.connectionSpec())).build()
 
-    show(ClientCreated("${SSLContext.getDefault().provider}\n${newClient.connectionSpecs()}"))
+    show(ClientCreated("${SSLContext.getDefault().provider} ${clientOptions.configSpec}"))
     return newClient
   }
 
@@ -171,7 +184,7 @@ class MainActivity : Activity() {
       Log.i(TAG, "" + it.name + " " + it.javaClass)
     }
 
-    gmsProvider = Security.getProvider("GmsCore_OpenSSL");
+    gmsProvider = Security.getProvider("GmsCore_OpenSSL")
 
     Security.removeProvider("GmsCore_OpenSSL")
   }

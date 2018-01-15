@@ -4,11 +4,14 @@ import android.net.ConnectivityManager
 import android.net.LinkProperties
 import android.net.Network
 import android.net.NetworkCapabilities
+import android.os.Build
+import android.support.annotation.RequiresApi
 import android.util.Log
 import com.squareup.okhttptestapp.MainActivity
 import com.squareup.okhttptestapp.model.NetworkEvent
 
-class NetworkListener(val main: MainActivity): ConnectivityManager.NetworkCallback() {
+@RequiresApi(Build.VERSION_CODES.M)
+class NetworkListener(val main: MainActivity) : ConnectivityManager.NetworkCallback() {
   override fun onCapabilitiesChanged(network: Network?,
       networkCapabilities: NetworkCapabilities?) {
     show(NetworkEvent("capabilities $network $networkCapabilities"))
@@ -38,7 +41,7 @@ class NetworkListener(val main: MainActivity): ConnectivityManager.NetworkCallba
   }
 
   override fun onLost(network: Network?) {
-    show(NetworkEvent("lost " + network))
+    show(NetworkEvent("lost $network"))
   }
 
   override fun onLinkPropertiesChanged(network: Network?, linkProperties: LinkProperties?) {
@@ -46,6 +49,6 @@ class NetworkListener(val main: MainActivity): ConnectivityManager.NetworkCallba
   }
 
   override fun onLosing(network: Network?, maxMsToLive: Int) {
-    show(NetworkEvent("losing $network in " + maxMsToLive + " ms"))
+    show(NetworkEvent("losing $network in $maxMsToLive ms"))
   }
 }

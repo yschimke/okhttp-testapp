@@ -5,7 +5,6 @@ import com.facebook.stetho.dumpapp.DumperPlugin
 import com.squareup.okhttptestapp.MainActivity
 import com.squareup.okhttptestapp.OkHttpTestApp
 import com.squareup.okhttptestapp.model.RequestOptions
-import okhttp3.Request
 
 class TestRequestDumperPlugin(val context: OkHttpTestApp) : DumperPlugin {
   override fun dump(dumpContext: DumperContext) {
@@ -19,7 +18,7 @@ class TestRequestDumperPlugin(val context: OkHttpTestApp) : DumperPlugin {
   }
 
   private fun get(testClient: MainActivity, dumpContext: DumperContext, rest: List<String>) {
-    testClient.executeCall(RequestOptions(true, rest[0]))
+    testClient.executeCall(RequestOptions(rest[0]))
 
 //    result.use {
 //      dumpContext.stderr.println(result)

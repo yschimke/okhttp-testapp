@@ -10,7 +10,8 @@ import com.facebook.litho.annotations.PropDefault
 
 @MountSpec
 object CheckboxComponentSpec {
-  @PropDefault @JvmField
+  @PropDefault
+  @JvmField
   val available = true
 
   @OnCreateMountContent
