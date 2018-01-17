@@ -7,8 +7,6 @@ OkHttp Test App
 $ ./gradlew installDebug
 ```
 
-Edit [TestSetup](https://github.com/yschimke/okhttp-testapp/blob/master/app/src/main/kotlin/com/squareup/okhttptestapp/TestSetup.kt) to configure the client and create a test request
-
 logs via 
 
 ```
