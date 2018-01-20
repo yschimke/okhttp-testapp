@@ -10,6 +10,15 @@ import android.os.Build
 import android.os.Bundle
 import android.support.annotation.RequiresApi
 import android.util.Log
+import brave.Tracing
+import brave.http.HttpTracing
+import brave.internal.Platform
+import brave.propagation.TraceContext
+import brave.sampler.Sampler
+import com.baulsupp.oksocial.tracing.HttpUriHandler
+import com.baulsupp.oksocial.tracing.UriTransportRegistry
+import com.baulsupp.oksocial.tracing.ZipkinTracingInterceptor
+import com.baulsupp.oksocial.tracing.ZipkinTracingListener
 import com.facebook.litho.LithoView
 import com.facebook.litho.sections.SectionContext
 import com.facebook.litho.sections.widget.RecyclerCollectionEventsController
@@ -37,9 +46,15 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.internal.platform.AndroidOptimisedPlatform
 import java.io.File
+import java.io.Flushable
+import java.net.URI
 import java.security.Provider
 import java.security.Security
+import java.util.Timer
+import java.util.TimerTask
+import java.util.function.Consumer
 import javax.net.ssl.SSLContext
+import kotlin.concurrent.scheduleAtFixedRate
 
 class MainActivity : Activity() {
   lateinit var c: SectionContext
@@ -179,9 +194,9 @@ class MainActivity : Activity() {
 //    testBuilder.addNetworkInterceptor(serviceInterceptor)
     testBuilder.addNetworkInterceptor(StethoInterceptor())
 
-//    if (clientOptions.zipkin) {
-//      applyZipkin(zipkinSenderUri, testBuilder)
-//    }
+    if (clientOptions.zipkin) {
+      applyZipkin(zipkinSenderUri, testBuilder)
+    }
 
     val newClient = testBuilder.build()
 
@@ -189,31 +204,34 @@ class MainActivity : Activity() {
     return newClient
   }
 
-//  private fun applyZipkin(zipkinSenderUri: String?, testBuilder: OkHttpClient.Builder) {
-//    val reporter = if (zipkinSenderUri != null) {
-//      UriTransportRegistry.forUri(zipkinSenderUri)
-//    } else {
-//      Platform.get().reporter()
-//    }
-//
-//    val tracing = Tracing.newBuilder()
-//        .localServiceName("okhttp-testclient")
-//        .spanReporter(reporter)
-//        .sampler(Sampler.ALWAYS_SAMPLE)
-//        .build()
-//
-//    val httpTracing = HttpTracing.create(tracing)
-//    val tracer = tracing.tracer()
-//
-//    val opener = Consumer { tc: TraceContext ->
-//      Log.i("MainActivity", "trace ${tc.traceIdString()}")
-//    }
-//
-//    testBuilder.eventListenerFactory { call ->
-//      ZipkinTracingListener(call, tracer, httpTracing, opener, true)
-//    }
-//    testBuilder.addNetworkInterceptor(ZipkinTracingInterceptor(tracing))
-//  }
+  private fun applyZipkin(zipkinSenderUri: String?, testBuilder: OkHttpClient.Builder) {
+    val reporter = if (zipkinSenderUri != null) {
+      HttpUriHandler().buildSender(URI.create(zipkinSenderUri))
+    } else {
+      Platform.get().reporter()
+    }
+
+    val tracing = Tracing.newBuilder()
+        .localServiceName("okhttp-testclient")
+        .spanReporter(reporter)
+        .sampler(Sampler.ALWAYS_SAMPLE)
+        .build()
+
+    val httpTracing = HttpTracing.create(tracing)
+    val tracer = tracing.tracer()
+
+    val opener = Consumer { tc: TraceContext ->
+      if (reporter is Flushable) {
+        reporter.flush()
+      }
+      Log.i("MainActivity", "trace ${tc.traceIdString()}")
+    }
+
+    testBuilder.eventListenerFactory { call ->
+      ZipkinTracingListener(call, tracer, httpTracing, opener, true)
+    }
+    testBuilder.addNetworkInterceptor(ZipkinTracingInterceptor(tracing))
+  }
 
   private fun loadGmsProvider() {
     try {
