@@ -15,6 +15,8 @@ import brave.http.HttpTracing
 import brave.internal.Platform
 import brave.propagation.TraceContext
 import brave.sampler.Sampler
+import com.baulsupp.oksocial.authenticator.ServiceInterceptor
+import com.baulsupp.oksocial.credentials.InMemoryCredentialsStore
 import com.baulsupp.oksocial.tracing.HttpUriHandler
 import com.baulsupp.oksocial.tracing.UriTransportRegistry
 import com.baulsupp.oksocial.tracing.ZipkinTracingInterceptor
@@ -50,11 +52,8 @@ import java.io.Flushable
 import java.net.URI
 import java.security.Provider
 import java.security.Security
-import java.util.Timer
-import java.util.TimerTask
 import java.util.function.Consumer
 import javax.net.ssl.SSLContext
-import kotlin.concurrent.scheduleAtFixedRate
 
 class MainActivity : Activity() {
   lateinit var c: SectionContext
@@ -189,9 +188,9 @@ class MainActivity : Activity() {
     testBuilder.connectionSpecs(
         listOf(clientOptions.configSpec.connectionSpec(), ConnectionSpec.CLEARTEXT))
 
-//    val credentialsStore = InMemoryCredentialsStore()
-//    var serviceInterceptor = ServiceInterceptor(testBuilder.build(), credentialsStore)
-//    testBuilder.addNetworkInterceptor(serviceInterceptor)
+    val credentialsStore = InMemoryCredentialsStore()
+    var serviceInterceptor = ServiceInterceptor(testBuilder.build(), credentialsStore)
+    testBuilder.addNetworkInterceptor(serviceInterceptor)
     testBuilder.addNetworkInterceptor(StethoInterceptor())
 
     if (clientOptions.zipkin) {
@@ -206,7 +205,7 @@ class MainActivity : Activity() {
 
   private fun applyZipkin(zipkinSenderUri: String?, testBuilder: OkHttpClient.Builder) {
     val reporter = if (zipkinSenderUri != null) {
-      HttpUriHandler().buildSender(URI.create(zipkinSenderUri))
+      UriTransportRegistry.forUri(zipkinSenderUri)
     } else {
       Platform.get().reporter()
     }
