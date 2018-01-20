@@ -21,8 +21,13 @@ import android.net.SSLSessionCache;
 import android.net.http.X509TrustManagerExtensions;
 import android.os.Build;
 import android.security.NetworkSecurityPolicy;
+import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.security.ProviderInstaller;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
@@ -42,7 +47,6 @@ import okhttp3.internal.tls.CertificateChainCleaner;
 /**
  * Android 5 or better.
  */
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 public class AndroidOptimisedPlatform extends Platform {
   private final SSLCertificateSocketFactory socketFactory;
 
@@ -89,6 +93,7 @@ public class AndroidOptimisedPlatform extends Platform {
 
   // TODO socket.relaxsslcheck
   @Override
+  @RequiresApi(Build.VERSION_CODES.M)
   public void configureTlsExtensions(
       SSLSocket sslSocket, String hostname, List<Protocol> protocols) {
     // Enable SNI and session tickets.
@@ -140,13 +145,38 @@ public class AndroidOptimisedPlatform extends Platform {
     return NetworkSecurityPolicy.getInstance().isCleartextTrafficPermitted();
   }
 
+  @RequiresApi(Build.VERSION_CODES.M)
   public CertificateChainCleaner buildCertificateChainCleaner(X509TrustManager trustManager) {
     return new AndroidCertificateChainCleaner(new X509TrustManagerExtensions(trustManager));
   }
 
-  public static AndroidOptimisedPlatform install(Context context) {
-    AndroidOptimisedPlatform platform = new AndroidOptimisedPlatform(context);
+  // TODO do this as part of a build method, log unavailability as a developer warning
+  public static void loadGmsProvider(Context context) {
+    try {
+      ProviderInstaller.installIfNeeded(context);
+    } catch (GooglePlayServicesRepairableException e) {
+      GoogleApiAvailability.getInstance()
+          .showErrorNotification(context, e.getConnectionStatusCode());
+    } catch (GooglePlayServicesNotAvailableException e) {
+      // ignore
+    }
+  }
 
+  @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+  public static @NonNull AndroidOptimisedPlatform install(Context context) {
+    AndroidOptimisedPlatform platform = build(context);
+
+    installPlatform(platform);
+
+    return platform;
+  }
+
+  @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+  public static @NonNull AndroidOptimisedPlatform build(Context context) {
+    return new AndroidOptimisedPlatform(context);
+  }
+
+  public static void installPlatform(Platform platform) {
     try {
       Field platformField = Platform.class.getDeclaredField("PLATFORM");
       platformField.setAccessible(true);
@@ -154,8 +184,10 @@ public class AndroidOptimisedPlatform extends Platform {
     } catch (Exception e) {
       throw new AssertionError(e);
     }
+  }
 
-    return platform;
+  public static Platform buildAndroidPlatform() {
+    return AndroidPlatform.buildIfSupported();
   }
 
   /**
@@ -171,6 +203,7 @@ public class AndroidOptimisedPlatform extends Platform {
     }
 
     @Override
+    @RequiresApi(Build.VERSION_CODES.M)
     public List<Certificate> clean(List<Certificate> chain, String hostname)
         throws SSLPeerUnverifiedException {
       try {

@@ -59,6 +59,28 @@ object ClientConfigComponentSpec {
                     configListener(newClientOptions)
                   }
                 }
+                component(c, CheckboxComponent::create) {
+                  label("Z")
+                  checked(clientOptions.zipkin)
+                  widthDip(100f)
+                  heightDip(40f)
+                  checkedListener {
+                    val newClientOptions = clientOptions.copy(zipkin = it)
+                    ClientConfigComponent.updateClientOptions(c, newClientOptions)
+                    configListener(newClientOptions)
+                  }
+                }
+                component(c, CheckboxComponent::create) {
+                  label("AOP")
+                  checked(clientOptions.optimized)
+                  widthDip(100f)
+                  heightDip(40f)
+                  checkedListener {
+                    val newClientOptions = clientOptions.copy(optimized = it)
+                    ClientConfigComponent.updateClientOptions(c, newClientOptions)
+                    configListener(newClientOptions)
+                  }
+                }
               }
             }
           }

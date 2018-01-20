@@ -17,7 +17,6 @@ import brave.propagation.TraceContext
 import brave.sampler.Sampler
 import com.baulsupp.oksocial.authenticator.ServiceInterceptor
 import com.baulsupp.oksocial.credentials.InMemoryCredentialsStore
-import com.baulsupp.oksocial.tracing.HttpUriHandler
 import com.baulsupp.oksocial.tracing.UriTransportRegistry
 import com.baulsupp.oksocial.tracing.ZipkinTracingInterceptor
 import com.baulsupp.oksocial.tracing.ZipkinTracingListener
@@ -37,6 +36,7 @@ import com.squareup.okhttptestapp.model.ClientCreated
 import com.squareup.okhttptestapp.model.ClientOptions
 import com.squareup.okhttptestapp.model.GmsInstall
 import com.squareup.okhttptestapp.model.Modern
+import com.squareup.okhttptestapp.model.PlatformEvent
 import com.squareup.okhttptestapp.model.RequestOptions
 import com.squareup.okhttptestapp.model.ResponseModel
 import com.squareup.okhttptestapp.network.NetworkListener
@@ -48,8 +48,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.internal.platform.AndroidOptimisedPlatform
 import java.io.File
-import java.io.Flushable
-import java.net.URI
 import java.security.Provider
 import java.security.Security
 import java.util.function.Consumer
@@ -74,6 +72,7 @@ class MainActivity : Activity() {
   private val scrollController = RecyclerCollectionEventsController()
 
   private var optimisedPlatform: AndroidOptimisedPlatform? = null
+  private lateinit var androidPlatform: okhttp3.internal.platform.Platform
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -92,15 +91,22 @@ class MainActivity : Activity() {
     }
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-      optimisedPlatform = AndroidOptimisedPlatform.install(this)
+      optimisedPlatform = AndroidOptimisedPlatform.build(this)
+      show(PlatformEvent())
+    } else {
+      show(PlatformEvent("AndroidOptimisedPlatform not available"))
     }
+    androidPlatform = AndroidOptimisedPlatform.buildAndroidPlatform()
 
     okhttpClient = createClient()
   }
 
   private fun readQueryFromSharedPreferences() {
     val gms = sharedPrefs.getBoolean("gms", true)
-    clientOptions = ClientOptions(gms = gms, configSpec = Modern, zipkin = true)
+    val zipkin = sharedPrefs.getBoolean("zipkin", false)
+    val optimized = sharedPrefs.getBoolean("optimized", false)
+    clientOptions = ClientOptions(gms = gms, configSpec = Modern, zipkin = zipkin,
+        optimized = optimized)
 
     val url = sharedPrefs.getString("url", "https://www.howsmyssl.com/a/check")
     requestOptions = RequestOptions(url)
@@ -108,7 +114,8 @@ class MainActivity : Activity() {
 
   private fun saveQueryToSharedPrefs() {
     sharedPrefs.edit().clear().putString("url", requestOptions.url).putBoolean("gms",
-        clientOptions.gms).apply()
+        clientOptions.gms).putBoolean("zipkin", clientOptions.zipkin).putBoolean("optimized",
+        clientOptions.optimized).apply()
   }
 
   private fun view() =
@@ -161,8 +168,6 @@ class MainActivity : Activity() {
       if (gmsProvider != null && SSLContext.getDefault().provider.name != "GmsCore_OpenSSL") {
         SSLContext.setDefault(SSLContext.getInstance("Default", gmsProvider))
         return true
-      } else {
-        Log.i(TAG, "No GMS provider to install")
       }
     } else {
       if (SSLContext.getDefault().provider.name == "GmsCore_OpenSSL") {
@@ -174,9 +179,17 @@ class MainActivity : Activity() {
     return false
   }
 
-  private val zipkinSenderUri: String? = "http://kali:9411/api/v2/spans"
+  private val zipkinUri: String? = "http://kali:9411/"
 
   private fun createClient(): OkHttpClient {
+    val platformName = if (clientOptions.optimized) {
+      AndroidOptimisedPlatform.installPlatform(optimisedPlatform)
+      AndroidOptimisedPlatform::class.simpleName
+    } else {
+      AndroidOptimisedPlatform.installPlatform(androidPlatform)
+      "AndroidPlatform"
+    }
+
     val testBuilder = OkHttpClient.Builder()
     testBuilder.eventListener(TestEventListener())
 
@@ -194,18 +207,18 @@ class MainActivity : Activity() {
     testBuilder.addNetworkInterceptor(StethoInterceptor())
 
     if (clientOptions.zipkin) {
-      applyZipkin(zipkinSenderUri, testBuilder)
+      applyZipkin(testBuilder)
     }
 
     val newClient = testBuilder.build()
 
-    show(ClientCreated("${SSLContext.getDefault().provider} ${clientOptions.configSpec}"))
+    show(ClientCreated("${SSLContext.getDefault().provider} ${clientOptions.configSpec} $platformName"))
     return newClient
   }
 
-  private fun applyZipkin(zipkinSenderUri: String?, testBuilder: OkHttpClient.Builder) {
-    val reporter = if (zipkinSenderUri != null) {
-      UriTransportRegistry.forUri(zipkinSenderUri)
+  private fun applyZipkin(testBuilder: OkHttpClient.Builder) {
+    val reporter = if (zipkinUri != null) {
+      UriTransportRegistry.forUri("${zipkinUri}api/v2/spans")
     } else {
       Platform.get().reporter()
     }
@@ -220,10 +233,9 @@ class MainActivity : Activity() {
     val tracer = tracing.tracer()
 
     val opener = Consumer { tc: TraceContext ->
-      if (reporter is Flushable) {
-        reporter.flush()
+      if (zipkinUri != null) {
+        Log.i("MainActivity", "trace ${zipkinUri}zipkin/traces/${tc.traceIdString()}")
       }
-      Log.i("MainActivity", "trace ${tc.traceIdString()}")
     }
 
     testBuilder.eventListenerFactory { call ->
