@@ -68,7 +68,7 @@ class MainActivity : Activity() {
     readQueryFromSharedPreferences()
 
     c = SectionContext(this)
-    lithoView = LithoView.create(this, view(requestOptions))
+    lithoView = LithoView.create(this, view())
     setContentView(lithoView)
 
     loadGmsProvider()
@@ -86,7 +86,7 @@ class MainActivity : Activity() {
 
   private fun readQueryFromSharedPreferences() {
     val gms = sharedPrefs.getBoolean("gms", true)
-    clientOptions = ClientOptions(gms = gms, configSpec = Modern)
+    clientOptions = ClientOptions(gms = gms, configSpec = Modern, zipkin = true)
 
     val url = sharedPrefs.getString("url", "https://www.howsmyssl.com/a/check")
     requestOptions = RequestOptions(url)
@@ -97,7 +97,7 @@ class MainActivity : Activity() {
         clientOptions.gms).apply()
   }
 
-  private fun view(requestOptions: RequestOptions) =
+  private fun view() =
       MainComponent.create(c)
           .initialClientOptions(clientOptions)
           .initialRequestOptions(requestOptions)
@@ -130,7 +130,7 @@ class MainActivity : Activity() {
 
   fun show(model: AppEvent) {
     results.add(model)
-    lithoView.setComponent(view(requestOptions))
+    lithoView.setComponent(view())
     scrollController.requestScrollToPosition(results.size, true)
   }
 
@@ -160,9 +160,10 @@ class MainActivity : Activity() {
     return false
   }
 
+  private val zipkinSenderUri: String? = "http://kali:9411/api/v2/spans"
+
   private fun createClient(): OkHttpClient {
     val testBuilder = OkHttpClient.Builder()
-    testBuilder.addNetworkInterceptor(StethoInterceptor())
     testBuilder.eventListener(TestEventListener())
 
     testBuilder.cache(Cache(File(cacheDir, "HttpResponseCache"), 10 * 1024 * 1024))
@@ -170,12 +171,49 @@ class MainActivity : Activity() {
     testBuilder.cookieJar(
         PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(this)))
 
-    val newClient = testBuilder.connectionSpecs(
-        listOf(clientOptions.configSpec.connectionSpec(), ConnectionSpec.CLEARTEXT)).build()
+    testBuilder.connectionSpecs(
+        listOf(clientOptions.configSpec.connectionSpec(), ConnectionSpec.CLEARTEXT))
+
+//    val credentialsStore = InMemoryCredentialsStore()
+//    var serviceInterceptor = ServiceInterceptor(testBuilder.build(), credentialsStore)
+//    testBuilder.addNetworkInterceptor(serviceInterceptor)
+    testBuilder.addNetworkInterceptor(StethoInterceptor())
+
+//    if (clientOptions.zipkin) {
+//      applyZipkin(zipkinSenderUri, testBuilder)
+//    }
+
+    val newClient = testBuilder.build()
 
     show(ClientCreated("${SSLContext.getDefault().provider} ${clientOptions.configSpec}"))
     return newClient
   }
+
+//  private fun applyZipkin(zipkinSenderUri: String?, testBuilder: OkHttpClient.Builder) {
+//    val reporter = if (zipkinSenderUri != null) {
+//      UriTransportRegistry.forUri(zipkinSenderUri)
+//    } else {
+//      Platform.get().reporter()
+//    }
+//
+//    val tracing = Tracing.newBuilder()
+//        .localServiceName("okhttp-testclient")
+//        .spanReporter(reporter)
+//        .sampler(Sampler.ALWAYS_SAMPLE)
+//        .build()
+//
+//    val httpTracing = HttpTracing.create(tracing)
+//    val tracer = tracing.tracer()
+//
+//    val opener = Consumer { tc: TraceContext ->
+//      Log.i("MainActivity", "trace ${tc.traceIdString()}")
+//    }
+//
+//    testBuilder.eventListenerFactory { call ->
+//      ZipkinTracingListener(call, tracer, httpTracing, opener, true)
+//    }
+//    testBuilder.addNetworkInterceptor(ZipkinTracingInterceptor(tracing))
+//  }
 
   private fun loadGmsProvider() {
     try {

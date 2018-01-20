@@ -25,7 +25,7 @@ class TestEventListener : EventListener() {
   override fun secureConnectStart(call: Call?) {}
 
   override fun secureConnectEnd(call: Call?, handshake: Handshake?) {
-    Log.i(TAG, handshake?.cipherSuite()?.javaName())
+//    Log.i(TAG, handshake?.cipherSuite()?.javaName())
   }
 
   override fun connectEnd(call: Call?, inetSocketAddress: InetSocketAddress?, proxy: Proxy?,
