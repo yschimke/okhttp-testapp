@@ -32,8 +32,10 @@ import com.squareup.okhttptestapp.network.NetworkListener
 import com.squareup.okhttptestapp.spec.MainComponent
 import kotlinx.coroutines.experimental.async
 import okhttp3.Cache
+import okhttp3.ConnectionSpec
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.internal.platform.AndroidOptimisedPlatform
 import java.io.File
 import java.security.Provider
 import java.security.Security
@@ -57,6 +59,8 @@ class MainActivity : Activity() {
 
   private val scrollController = RecyclerCollectionEventsController()
 
+  private var optimisedPlatform: AndroidOptimisedPlatform? = null
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
@@ -71,6 +75,10 @@ class MainActivity : Activity() {
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       registerNetworkListener()
+    }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      optimisedPlatform = AndroidOptimisedPlatform.install(this)
     }
 
     okhttpClient = createClient()
@@ -163,7 +171,7 @@ class MainActivity : Activity() {
         PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(this)))
 
     val newClient = testBuilder.connectionSpecs(
-        listOf(clientOptions.configSpec.connectionSpec())).build()
+        listOf(clientOptions.configSpec.connectionSpec(), ConnectionSpec.CLEARTEXT)).build()
 
     show(ClientCreated("${SSLContext.getDefault().provider} ${clientOptions.configSpec}"))
     return newClient
