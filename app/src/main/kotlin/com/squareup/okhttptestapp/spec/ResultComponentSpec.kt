@@ -1,5 +1,10 @@
 package com.squareup.okhttptestapp.spec
 
+import android.graphics.Color
+import android.os.Build
+import android.support.annotation.RequiresApi
+import android.text.SpannableStringBuilder
+import android.text.style.ForegroundColorSpan
 import com.facebook.litho.ClickEvent
 import com.facebook.litho.ComponentContext
 import com.facebook.litho.ComponentLayout
@@ -28,6 +33,11 @@ import java.io.IOException
 import java.io.PrintWriter
 import java.io.StringWriter
 
+val errorSpan = ForegroundColorSpan(Color.parseColor("magenta"))
+val successSpan = ForegroundColorSpan(Color.parseColor("olive"))
+val progressSpan = ForegroundColorSpan(Color.GRAY)
+val bodySpan = ForegroundColorSpan(Color.DKGRAY)
+
 @LayoutSpec
 object ResultComponentSpec {
   @OnCreateInitialState
@@ -50,7 +60,8 @@ object ResultComponentSpec {
 
         override fun onResponse(call: Call, httpResponse: Response) {
           val body = httpResponse.body()?.string()
-          ResultComponent.updateResponseAsync(c, CompletedResponse(httpResponse, httpResponse.code(), body))
+          ResultComponent.updateResponseAsync(c,
+              CompletedResponse(httpResponse, httpResponse.code(), body))
         }
       })
     }
@@ -86,7 +97,12 @@ object ResultComponentSpec {
     ResultComponent.updateExpandedAsync(c);
   }
 
-  private fun resultText(result: CallEvent, response: ResponseModel, expanded: Boolean): String {
+  private fun resultText(result: CallEvent, response: ResponseModel,
+      expanded: Boolean): CharSequence {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      return colorResultText(result, response, expanded)
+    }
+
     val status = when (response) {
       is InProgress -> "..."
       is FailedResponse -> response.exception.message
@@ -107,6 +123,33 @@ object ResultComponentSpec {
     }
 
     return mainLine
+  }
+
+  @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+  private fun colorResultText(result: CallEvent, response: ResponseModel,
+      expanded: Boolean): CharSequence {
+    val r = SpannableStringBuilder(result.call.request().url().toString())
+    r.append(" ")
+    when (response) {
+      is InProgress -> r.append("...", progressSpan, 0)
+      is FailedResponse -> r.append(response.exception.message, errorSpan, 0)
+      is CompletedResponse -> r.append(response.code.toString(), successSpan, 0)
+    }
+
+    if (expanded) {
+      val full = when (response) {
+        is InProgress -> null
+        is FailedResponse -> stackTrace(response.exception)
+        is CompletedResponse -> response.bodyText
+      }
+
+      if (full != null) {
+        r.append("\n")
+        r.append(full, bodySpan, 0)
+      }
+    }
+
+    return r
   }
 
   private fun stackTrace(exception: IOException): String = StringWriter().use {
