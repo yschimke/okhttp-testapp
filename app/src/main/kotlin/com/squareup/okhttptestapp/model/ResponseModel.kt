@@ -1,15 +1,12 @@
 package com.squareup.okhttptestapp.model
 
-import okhttp3.Call
+import okhttp3.Response
+import java.io.IOException
 
-sealed class AppEvent
+sealed class ResponseModel
 
-data class ResponseModel(val call: Call) : AppEvent()
+data class InProgress(val since: Long = System.currentTimeMillis()): ResponseModel()
 
-data class SystemState(val state: String) : AppEvent()
+data class FailedResponse(val exception: IOException): ResponseModel()
 
-data class GmsInstall(val error: String? = null) : AppEvent()
-
-data class ClientCreated(val description: String) : AppEvent()
-
-data class NetworkEvent(val description: String) : AppEvent()
+data class CompletedResponse(val response: Response, val code: Int, val bodyText: String?): ResponseModel()
