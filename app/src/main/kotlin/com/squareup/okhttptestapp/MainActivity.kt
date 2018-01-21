@@ -38,7 +38,7 @@ import com.squareup.okhttptestapp.model.GmsInstall
 import com.squareup.okhttptestapp.model.Modern
 import com.squareup.okhttptestapp.model.PlatformEvent
 import com.squareup.okhttptestapp.model.RequestOptions
-import com.squareup.okhttptestapp.model.ResponseModel
+import com.squareup.okhttptestapp.model.CallEvent
 import com.squareup.okhttptestapp.network.NetworkListener
 import com.squareup.okhttptestapp.spec.MainComponent
 import kotlinx.coroutines.experimental.async
@@ -145,7 +145,7 @@ class MainActivity : Activity() {
 
     async {
       val request = Request.Builder().url(requestOptions.url).build()
-      show(ResponseModel(okhttpClient.newCall(request)))
+      show(CallEvent(okhttpClient.newCall(request)))
     }
   }
 
@@ -182,15 +182,17 @@ class MainActivity : Activity() {
   private val zipkinUri: String? = "http://kali:9411/"
 
   private fun createClient(): OkHttpClient {
+    var testBuilder = OkHttpClient.Builder()
+
     val platformName = if (clientOptions.optimized) {
       AndroidOptimisedPlatform.installPlatform(optimisedPlatform)
+      optimisedPlatform!!.configureBuilder(testBuilder)
       AndroidOptimisedPlatform::class.simpleName
     } else {
       AndroidOptimisedPlatform.installPlatform(androidPlatform)
       "AndroidPlatform"
     }
 
-    val testBuilder = OkHttpClient.Builder()
     testBuilder.eventListener(TestEventListener())
 
     testBuilder.cache(Cache(File(cacheDir, "HttpResponseCache"), 10 * 1024 * 1024))

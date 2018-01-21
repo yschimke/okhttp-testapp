@@ -21,7 +21,7 @@ import com.squareup.okhttptestapp.model.ClientCreated
 import com.squareup.okhttptestapp.model.GmsInstall
 import com.squareup.okhttptestapp.model.NetworkEvent
 import com.squareup.okhttptestapp.model.PlatformEvent
-import com.squareup.okhttptestapp.model.ResponseModel
+import com.squareup.okhttptestapp.model.CallEvent
 import com.squareup.okhttptestapp.model.SystemState
 
 @GroupSectionSpec
@@ -43,7 +43,7 @@ object ResultsListSectionSpec {
       @FromEvent model: AppEvent,
       @FromEvent index: Int): RenderInfo {
     val component = when (model) {
-      is ResponseModel -> ResultComponent.create(c).result(model)
+      is CallEvent -> ResultComponent.create(c).result(model)
       is GmsInstall -> textRow(c, "GMS Provider: ${model.error ?: "installed"}")
       is SystemState -> textRow(c, "System State: ${model.state}")
       is ClientCreated -> textRow(c, "Client: ${model.description}")

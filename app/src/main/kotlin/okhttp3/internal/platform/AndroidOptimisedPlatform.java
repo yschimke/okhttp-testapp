@@ -40,9 +40,11 @@ import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
+import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
 import okhttp3.internal.Util;
 import okhttp3.internal.tls.CertificateChainCleaner;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Android 5 or better.
@@ -76,10 +78,8 @@ public class AndroidOptimisedPlatform extends Platform {
     } catch (ClassCastException e) {
       // On android 8.0, socket.connect throws a ClassCastException due to a bug
       // see https://issuetracker.google.com/issues/63649622
-      if (Build.VERSION.SDK_INT == 26) {
-        IOException ioException = new IOException("Exception in connect");
-        ioException.initCause(e);
-        throw ioException;
+      if (Build.VERSION.SDK_INT == Build.VERSION_CODES.O) {
+        throw new IOException("Exception in connect", e);
       } else {
         throw e;
       }
@@ -150,44 +150,7 @@ public class AndroidOptimisedPlatform extends Platform {
     return new AndroidCertificateChainCleaner(new X509TrustManagerExtensions(trustManager));
   }
 
-  // TODO do this as part of a build method, log unavailability as a developer warning
-  public static void loadGmsProvider(Context context) {
-    try {
-      ProviderInstaller.installIfNeeded(context);
-    } catch (GooglePlayServicesRepairableException e) {
-      GoogleApiAvailability.getInstance()
-          .showErrorNotification(context, e.getConnectionStatusCode());
-    } catch (GooglePlayServicesNotAvailableException e) {
-      // ignore
-    }
-  }
-
-  @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-  public static @NonNull AndroidOptimisedPlatform install(Context context) {
-    AndroidOptimisedPlatform platform = build(context);
-
-    installPlatform(platform);
-
-    return platform;
-  }
-
-  @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-  public static @NonNull AndroidOptimisedPlatform build(Context context) {
-    return new AndroidOptimisedPlatform(context);
-  }
-
-  public static void installPlatform(Platform platform) {
-    try {
-      Field platformField = Platform.class.getDeclaredField("PLATFORM");
-      platformField.setAccessible(true);
-      platformField.set(null, platform);
-    } catch (Exception e) {
-      throw new AssertionError(e);
-    }
-  }
-
-  public static Platform buildAndroidPlatform() {
-    return AndroidPlatform.buildIfSupported();
+  @NotNull public void configureBuilder(@NotNull OkHttpClient.Builder clientBuilder) {
   }
 
   /**
@@ -227,5 +190,45 @@ public class AndroidOptimisedPlatform extends Platform {
     public int hashCode() {
       return 0;
     }
+  }
+
+  // TODO do this as part of a build method, log unavailability as a developer warning
+  public static void loadGmsProvider(Context context) {
+    try {
+      ProviderInstaller.installIfNeeded(context);
+    } catch (GooglePlayServicesRepairableException e) {
+      GoogleApiAvailability.getInstance()
+          .showErrorNotification(context, e.getConnectionStatusCode());
+    } catch (GooglePlayServicesNotAvailableException e) {
+      // ignore
+    }
+  }
+
+  @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+  public static @NonNull AndroidOptimisedPlatform install(Context context) {
+    AndroidOptimisedPlatform platform = build(context);
+
+    installPlatform(platform);
+
+    return platform;
+  }
+
+  @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+  public static @NonNull AndroidOptimisedPlatform build(Context context) {
+    return new AndroidOptimisedPlatform(context);
+  }
+
+  public static void installPlatform(Platform platform) {
+    try {
+      Field platformField = Platform.class.getDeclaredField("PLATFORM");
+      platformField.setAccessible(true);
+      platformField.set(null, platform);
+    } catch (Exception e) {
+      throw new AssertionError(e);
+    }
+  }
+
+  public static Platform buildAndroidPlatform() {
+    return AndroidPlatform.buildIfSupported();
   }
 }
