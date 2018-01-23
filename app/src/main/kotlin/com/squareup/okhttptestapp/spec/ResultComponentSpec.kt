@@ -59,7 +59,9 @@ object ResultComponentSpec {
         }
 
         override fun onResponse(call: Call, httpResponse: Response) {
-          val body = httpResponse.body()?.string()
+          val contentType = httpResponse.body()!!.contentType()
+          val isText = contentType!!.subtype() == "json" || contentType.type() == "text"
+          val body = if (isText) httpResponse.body()?.string() else null
           ResultComponent.updateResponseAsync(c,
               CompletedResponse(httpResponse, httpResponse.code(), body))
         }

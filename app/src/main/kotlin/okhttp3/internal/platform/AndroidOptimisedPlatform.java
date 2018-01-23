@@ -30,12 +30,19 @@ import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.security.ProviderInstaller;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.ProxySelector;
 import java.net.Socket;
+import java.net.SocketAddress;
+import java.net.URI;
+import java.net.UnknownHostException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import javax.net.SocketFactory;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -151,6 +158,9 @@ public class AndroidOptimisedPlatform extends Platform {
   }
 
   @NotNull public void configureBuilder(@NotNull OkHttpClient.Builder clientBuilder) {
+    clientBuilder.proxySelector(new AndroidProxySelector());
+    clientBuilder.socketFactory(new AndroidSocketFactory());
+    //clientBuilder.connectionPool();
   }
 
   /**
@@ -230,5 +240,47 @@ public class AndroidOptimisedPlatform extends Platform {
 
   public static Platform buildAndroidPlatform() {
     return AndroidPlatform.buildIfSupported();
+  }
+
+  class AndroidProxySelector extends ProxySelector {
+    @Override public List<Proxy> select(URI uri) {
+      List<Proxy> proxies = ProxySelector.getDefault().select(uri);
+      Log.i("AndroidProxySelector", "" + uri + " " + proxies);
+      return proxies;
+    }
+
+    @Override public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {
+      ProxySelector.getDefault().connectFailed(uri, sa, ioe);
+    }
+  }
+
+  class AndroidSocketFactory extends SocketFactory {
+    private SocketFactory socketFactory = SocketFactory.getDefault();
+
+    @Override public Socket createSocket() throws IOException {
+      return socketFactory.createSocket();
+    }
+
+    @Override public Socket createSocket(String host, int port)
+        throws IOException, UnknownHostException {
+      return socketFactory.createSocket(host, port);
+    }
+
+    @Override
+    public Socket createSocket(String host, int port, InetAddress localHost, int localPort)
+        throws IOException, UnknownHostException {
+      return socketFactory.createSocket(host, port, localHost, localPort);
+    }
+
+    @Override public Socket createSocket(InetAddress host, int port) throws IOException {
+      return socketFactory.createSocket(host, port);
+    }
+
+    @Override
+    public Socket createSocket(InetAddress address, int port, InetAddress localAddress,
+        int localPort)
+        throws IOException {
+      return socketFactory.createSocket(address, port, localAddress, localPort);
+    }
   }
 }
