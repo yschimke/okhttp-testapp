@@ -1,5 +1,6 @@
 package com.squareup.okhttptestapp.spec
 
+import android.util.Log
 import com.facebook.litho.ComponentContext
 import com.facebook.litho.ComponentLayout
 import com.facebook.litho.StateValue
@@ -10,6 +11,7 @@ import com.facebook.litho.annotations.OnUpdateState
 import com.facebook.litho.annotations.Param
 import com.facebook.litho.annotations.Prop
 import com.facebook.litho.annotations.State
+import com.facebook.yoga.YogaWrap
 import com.makeramen.litho.children
 import com.makeramen.litho.column
 import com.makeramen.litho.component
@@ -36,6 +38,7 @@ object ClientConfigComponentSpec {
         column(c) {
           children {
             row(c) {
+              wrap(YogaWrap.WRAP)
               children {
                 component(c, CheckboxComponent::create) {
                   label("GMS")
@@ -77,6 +80,16 @@ object ClientConfigComponentSpec {
                   heightDip(40f)
                   checkedListener {
                     val newClientOptions = clientOptions.copy(optimized = it)
+                    ClientConfigComponent.updateClientOptions(c, newClientOptions)
+                    configListener(newClientOptions)
+                  }
+                }
+                component(c, IpModeComponent::create) {
+                  initialMode(clientOptions.iPvMode)
+                  widthDip(160f)
+                  heightDip(40f)
+                  selectionListener {
+                    val newClientOptions = clientOptions.copy(iPvMode = it)
                     ClientConfigComponent.updateClientOptions(c, newClientOptions)
                     configListener(newClientOptions)
                   }

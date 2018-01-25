@@ -17,6 +17,8 @@ import brave.propagation.TraceContext
 import brave.sampler.Sampler
 import com.baulsupp.oksocial.authenticator.ServiceInterceptor
 import com.baulsupp.oksocial.credentials.InMemoryCredentialsStore
+import com.baulsupp.oksocial.network.DnsSelector
+import com.baulsupp.oksocial.network.IPvMode
 import com.baulsupp.oksocial.tracing.UriTransportRegistry
 import com.baulsupp.oksocial.tracing.ZipkinTracingInterceptor
 import com.baulsupp.oksocial.tracing.ZipkinTracingListener
@@ -44,6 +46,7 @@ import com.squareup.okhttptestapp.spec.MainComponent
 import kotlinx.coroutines.experimental.async
 import okhttp3.Cache
 import okhttp3.ConnectionSpec
+import okhttp3.Dns
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.internal.platform.AndroidOptimisedPlatform
@@ -105,8 +108,9 @@ class MainActivity : Activity() {
     val gms = sharedPrefs.getBoolean("gms", true)
     val zipkin = sharedPrefs.getBoolean("zipkin", false)
     val optimized = sharedPrefs.getBoolean("optimized", false)
+    val ipMode = sharedPrefs.getString("ipmode", null)?.let { IPvMode.fromString(it) } ?: IPvMode.SYSTEM
     clientOptions = ClientOptions(gms = gms, configSpec = Modern, zipkin = zipkin,
-        optimized = optimized)
+        optimized = optimized, iPvMode = ipMode)
 
     val url = sharedPrefs.getString("url", "https://www.howsmyssl.com/a/check")
     requestOptions = RequestOptions(url)
@@ -115,7 +119,7 @@ class MainActivity : Activity() {
   private fun saveQueryToSharedPrefs() {
     sharedPrefs.edit().clear().putString("url", requestOptions.url).putBoolean("gms",
         clientOptions.gms).putBoolean("zipkin", clientOptions.zipkin).putBoolean("optimized",
-        clientOptions.optimized).apply()
+        clientOptions.optimized).putString("ipmode", clientOptions.iPvMode.name).apply()
   }
 
   private fun view() =
@@ -203,6 +207,8 @@ class MainActivity : Activity() {
     testBuilder.connectionSpecs(
         listOf(clientOptions.configSpec.connectionSpec(), ConnectionSpec.CLEARTEXT))
 
+    testBuilder.dns(DnsSelector(clientOptions.iPvMode, Dns.SYSTEM))
+
     val credentialsStore = InMemoryCredentialsStore()
     var serviceInterceptor = ServiceInterceptor(testBuilder.build(), credentialsStore)
     testBuilder.addNetworkInterceptor(serviceInterceptor)
@@ -214,7 +220,7 @@ class MainActivity : Activity() {
 
     val newClient = testBuilder.build()
 
-    show(ClientCreated("${SSLContext.getDefault().provider} ${clientOptions.configSpec} $platformName"))
+    show(ClientCreated("${SSLContext.getDefault().provider} $platformName ${clientOptions.configSpec} ${clientOptions.iPvMode}"))
     return newClient
   }
 
