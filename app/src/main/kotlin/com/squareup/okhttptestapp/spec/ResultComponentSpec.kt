@@ -26,6 +26,7 @@ import com.squareup.okhttptestapp.model.CompletedResponse
 import com.squareup.okhttptestapp.model.FailedResponse
 import com.squareup.okhttptestapp.model.InProgress
 import com.squareup.okhttptestapp.model.ResponseModel
+import com.squareup.okhttptestapp.stackTraceString
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Response
@@ -115,7 +116,7 @@ object ResultComponentSpec {
     if (expanded) {
       val full = when (response) {
         is InProgress -> null
-        is FailedResponse -> stackTrace(response.exception)
+        is FailedResponse -> response.exception.stackTraceString()
         is CompletedResponse -> response.bodyText
       }
 
@@ -141,7 +142,7 @@ object ResultComponentSpec {
     if (expanded) {
       val full = when (response) {
         is InProgress -> null
-        is FailedResponse -> stackTrace(response.exception)
+        is FailedResponse -> response.exception.stackTraceString()
         is CompletedResponse -> response.bodyText
       }
 
@@ -152,10 +153,5 @@ object ResultComponentSpec {
     }
 
     return r
-  }
-
-  private fun stackTrace(exception: IOException): String = StringWriter().use {
-    exception.printStackTrace(PrintWriter(it))
-    it.toString()
   }
 }

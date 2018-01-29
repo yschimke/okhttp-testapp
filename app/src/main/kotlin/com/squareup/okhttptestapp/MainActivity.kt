@@ -220,7 +220,7 @@ class MainActivity : Activity() {
 
     val newClient = testBuilder.build()
 
-    show(ClientCreated("${SSLContext.getDefault().provider} $platformName ${clientOptions.configSpec} ${clientOptions.iPvMode}"))
+    show(ClientCreated(SSLContext.getDefault().provider, platformName, clientOptions))
     return newClient
   }
 
@@ -257,10 +257,10 @@ class MainActivity : Activity() {
       ProviderInstaller.installIfNeeded(this)
       show(GmsInstall())
     } catch (e: GooglePlayServicesRepairableException) {
-      show(GmsInstall("Repairable: " + e.message))
+      show(GmsInstall("Repairable: " + e.message, e))
       GoogleApiAvailability.getInstance().showErrorNotification(this, e.connectionStatusCode)
     } catch (e: GooglePlayServicesNotAvailableException) {
-      show(GmsInstall("Google Play unavailable"))
+      show(GmsInstall("Google Play unavailable", e))
     }
 
     Security.getProviders().forEach {

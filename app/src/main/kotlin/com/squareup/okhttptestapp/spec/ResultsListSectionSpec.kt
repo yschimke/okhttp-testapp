@@ -44,11 +44,7 @@ object ResultsListSectionSpec {
       @FromEvent index: Int): RenderInfo {
     val component = when (model) {
       is CallEvent -> ResultComponent.create(c).result(model)
-      is GmsInstall -> textRow(c, "GMS Provider: ${model.error ?: "installed"}")
-      is SystemState -> textRow(c, "System State: ${model.state}")
-      is ClientCreated -> textRow(c, "Client: ${model.description}")
-      is NetworkEvent -> textRow(c, "Network: ${model.description}")
-      is PlatformEvent -> textRow(c, "AndroidOptimizedPlatform: ${model.error ?: " available"}")
+      else -> EventComponent.create(c).result(model)
     }
 
     if (index > 0) {
