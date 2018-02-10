@@ -25,7 +25,6 @@ import com.baulsupp.oksocial.tracing.ZipkinTracingListener
 import com.facebook.litho.LithoView
 import com.facebook.litho.sections.SectionContext
 import com.facebook.litho.sections.widget.RecyclerCollectionEventsController
-import com.facebook.stetho.okhttp3.StethoInterceptor
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
@@ -34,13 +33,13 @@ import com.google.android.gms.common.GooglePlayServicesNotAvailableException
 import com.google.android.gms.common.GooglePlayServicesRepairableException
 import com.google.android.gms.security.ProviderInstaller
 import com.squareup.okhttptestapp.model.AppEvent
+import com.squareup.okhttptestapp.model.CallEvent
 import com.squareup.okhttptestapp.model.ClientCreated
 import com.squareup.okhttptestapp.model.ClientOptions
 import com.squareup.okhttptestapp.model.GmsInstall
 import com.squareup.okhttptestapp.model.Modern
 import com.squareup.okhttptestapp.model.PlatformEvent
 import com.squareup.okhttptestapp.model.RequestOptions
-import com.squareup.okhttptestapp.model.CallEvent
 import com.squareup.okhttptestapp.network.NetworkListener
 import com.squareup.okhttptestapp.spec.MainComponent
 import kotlinx.coroutines.experimental.async
@@ -108,7 +107,8 @@ class MainActivity : Activity() {
     val gms = sharedPrefs.getBoolean("gms", true)
     val zipkin = sharedPrefs.getBoolean("zipkin", false)
     val optimized = sharedPrefs.getBoolean("optimized", false)
-    val ipMode = sharedPrefs.getString("ipmode", null)?.let { IPvMode.fromString(it) } ?: IPvMode.SYSTEM
+    val ipMode = sharedPrefs.getString("ipmode", null)?.let { IPvMode.fromString(it) }
+        ?: IPvMode.SYSTEM
     clientOptions = ClientOptions(gms = gms, configSpec = Modern, zipkin = zipkin,
         optimized = optimized, iPvMode = ipMode)
 
@@ -212,7 +212,6 @@ class MainActivity : Activity() {
     val credentialsStore = InMemoryCredentialsStore()
     var serviceInterceptor = ServiceInterceptor(testBuilder.build(), credentialsStore)
     testBuilder.addNetworkInterceptor(serviceInterceptor)
-    testBuilder.addNetworkInterceptor(StethoInterceptor())
 
     if (clientOptions.zipkin) {
       applyZipkin(testBuilder)
