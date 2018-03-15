@@ -2,7 +2,6 @@ package com.squareup.okhttptestapp
 
 import android.app.Activity
 import android.content.Context
-import android.content.SharedPreferences
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
@@ -42,6 +41,8 @@ import com.squareup.okhttptestapp.model.PlatformEvent
 import com.squareup.okhttptestapp.model.RequestOptions
 import com.squareup.okhttptestapp.network.NetworkListener
 import com.squareup.okhttptestapp.spec.MainComponent
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import okhttp3.Cache
 import okhttp3.ConnectionSpec
@@ -61,13 +62,12 @@ class MainActivity : Activity() {
 
   private lateinit var lithoView: LithoView
 
-  private lateinit var requestOptions: RequestOptions
+  private var requestOptions: RequestOptions = RequestOptions("https://www.howsmyssl.com/a/check")
 
-  private lateinit var clientOptions: ClientOptions
+  private var clientOptions: ClientOptions = ClientOptions(gms = false, configSpec = Modern, zipkin = false,
+      optimized = false, iPvMode = IPvMode.SYSTEM)
 
-  private lateinit var sharedPrefs: SharedPreferences
-
-  private lateinit var okhttpClient: OkHttpClient
+  private var okhttpClient: OkHttpClient? = null
 
   private var gmsProvider: Provider? = null
 
@@ -78,9 +78,6 @@ class MainActivity : Activity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
-    sharedPrefs = this.getSharedPreferences("com.squareup.okhttptestapp", Context.MODE_PRIVATE)
-    readQueryFromSharedPreferences()
 
     c = SectionContext(this)
     lithoView = LithoView.create(this, view())
@@ -100,27 +97,40 @@ class MainActivity : Activity() {
     }
     androidPlatform = AndroidOptimisedPlatform.buildAndroidPlatform()
 
-    okhttpClient = createClient()
+    initializeFromPreviousSavedState()
   }
 
-  private fun readQueryFromSharedPreferences() {
-    val gms = sharedPrefs.getBoolean("gms", true)
-    val zipkin = sharedPrefs.getBoolean("zipkin", false)
-    val optimized = sharedPrefs.getBoolean("optimized", false)
-    val ipMode = sharedPrefs.getString("ipmode", null)?.let { IPvMode.fromString(it) }
-        ?: IPvMode.SYSTEM
-    clientOptions = ClientOptions(gms = gms, configSpec = Modern, zipkin = zipkin,
-        optimized = optimized, iPvMode = ipMode)
+  private fun initializeFromPreviousSavedState() {
+    async(CommonPool) {
+      val sharedPrefs = getSharedPrefs()
 
-    val url = sharedPrefs.getString("url", "https://www.howsmyssl.com/a/check")
-    requestOptions = RequestOptions(url)
+      val gms = sharedPrefs.getBoolean("gms", true)
+      val zipkin = sharedPrefs.getBoolean("zipkin", false)
+      val optimized = sharedPrefs.getBoolean("optimized", false)
+      val ipMode = sharedPrefs.getString("ipmode", null)?.let { IPvMode.fromString(it) }
+          ?: IPvMode.SYSTEM
+      clientOptions = ClientOptions(gms = gms, configSpec = Modern, zipkin = zipkin,
+          optimized = optimized, iPvMode = ipMode)
+
+      val url = sharedPrefs.getString("url", "https://www.howsmyssl.com/a/check")
+      requestOptions = RequestOptions(url)
+
+      async(UI) {
+        lithoView.setComponent(view())
+      }
+    }
   }
 
   private fun saveQueryToSharedPrefs() {
+    val sharedPrefs = getSharedPrefs()
+
     sharedPrefs.edit().clear().putString("url", requestOptions.url).putBoolean("gms",
         clientOptions.gms).putBoolean("zipkin", clientOptions.zipkin).putBoolean("optimized",
         clientOptions.optimized).putString("ipmode", clientOptions.iPvMode.name).apply()
   }
+
+  private fun getSharedPrefs() =
+      this.getSharedPreferences("com.squareup.okhttptestapp", Context.MODE_PRIVATE)
 
   private fun view() =
       MainComponent.create(c)
@@ -134,22 +144,26 @@ class MainActivity : Activity() {
           .build()
 
   private fun updateClientOptions(clientOptions: ClientOptions) {
-    this.clientOptions = clientOptions
+    async {
+      saveQueryToSharedPrefs()
 
-    setupProviders()
-    okhttpClient = createClient()
+      this@MainActivity.clientOptions = clientOptions
 
-    saveQueryToSharedPrefs()
+      setupProviders()
+      synchronized(this) {
+        okhttpClient = null
+      }
+    }
   }
 
   fun executeCall(newRequestOptions: RequestOptions) {
     requestOptions = newRequestOptions
 
-    saveQueryToSharedPrefs()
-
     async {
+      saveQueryToSharedPrefs()
+
       val request = Request.Builder().url(requestOptions.url).build()
-      show(CallEvent(okhttpClient.newCall(request)))
+      show(CallEvent(getClient().newCall(request)))
     }
   }
 
@@ -185,42 +199,48 @@ class MainActivity : Activity() {
 
   private val zipkinUri: String? = "http://kali:9411/"
 
-  private fun createClient(): OkHttpClient {
-    var testBuilder = OkHttpClient.Builder()
+  private fun getClient(): OkHttpClient {
+    synchronized(this) {
+      if (okhttpClient == null) {
+        var testBuilder = OkHttpClient.Builder()
 
-    val platformName = if (clientOptions.optimized) {
-      AndroidOptimisedPlatform.installPlatform(optimisedPlatform)
-      optimisedPlatform!!.configureBuilder(testBuilder)
-      AndroidOptimisedPlatform::class.simpleName
-    } else {
-      AndroidOptimisedPlatform.installPlatform(androidPlatform)
-      "AndroidPlatform"
+        val platformName = if (clientOptions.optimized) {
+          AndroidOptimisedPlatform.installPlatform(optimisedPlatform)
+          optimisedPlatform!!.configureClient(testBuilder)
+          AndroidOptimisedPlatform::class.simpleName
+        } else {
+          AndroidOptimisedPlatform.installPlatform(androidPlatform)
+          "AndroidPlatform"
+        }
+
+        testBuilder.eventListener(TestEventListener())
+
+        val cache = Cache(File(cacheDir, "HttpResponseCache"), 10 * 1024 * 1024)
+        testBuilder.cache(cache)
+
+        testBuilder.cookieJar(
+            PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(this)))
+
+        testBuilder.connectionSpecs(
+            listOf(clientOptions.configSpec.connectionSpec(), ConnectionSpec.CLEARTEXT))
+
+        testBuilder.dns(DnsSelector(clientOptions.iPvMode, Dns.SYSTEM))
+
+        val credentialsStore = InMemoryCredentialsStore()
+        var serviceInterceptor = ServiceInterceptor(testBuilder.build(), credentialsStore)
+        testBuilder.addNetworkInterceptor(serviceInterceptor)
+
+        if (clientOptions.zipkin) {
+          applyZipkin(testBuilder)
+        }
+
+        okhttpClient = testBuilder.build()
+
+        show(ClientCreated(SSLContext.getDefault().provider, platformName, clientOptions))
+      }
+
+      return okhttpClient!!
     }
-
-    testBuilder.eventListener(TestEventListener())
-
-    testBuilder.cache(Cache(File(cacheDir, "HttpResponseCache"), 10 * 1024 * 1024))
-
-    testBuilder.cookieJar(
-        PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(this)))
-
-    testBuilder.connectionSpecs(
-        listOf(clientOptions.configSpec.connectionSpec(), ConnectionSpec.CLEARTEXT))
-
-    testBuilder.dns(DnsSelector(clientOptions.iPvMode, Dns.SYSTEM))
-
-    val credentialsStore = InMemoryCredentialsStore()
-    var serviceInterceptor = ServiceInterceptor(testBuilder.build(), credentialsStore)
-    testBuilder.addNetworkInterceptor(serviceInterceptor)
-
-    if (clientOptions.zipkin) {
-      applyZipkin(testBuilder)
-    }
-
-    val newClient = testBuilder.build()
-
-    show(ClientCreated(SSLContext.getDefault().provider, platformName, clientOptions))
-    return newClient
   }
 
   private fun applyZipkin(testBuilder: OkHttpClient.Builder) {
@@ -262,9 +282,9 @@ class MainActivity : Activity() {
       show(GmsInstall("Google Play unavailable", e))
     }
 
-    Security.getProviders().forEach {
-      Log.i(TAG, "" + it.name + " " + it.javaClass)
-    }
+//    Security.getProviders().forEach {
+//      Log.i(TAG, "" + it.name + " " + it.javaClass)
+//    }
 
     gmsProvider = Security.getProvider("GmsCore_OpenSSL")
 
