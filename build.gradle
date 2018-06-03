@@ -1,21 +1,23 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.kotlin_version = '1.2.30'
-    ext.anko_version = '0.10.4'
+    ext.kotlin_version = '1.2.41'
+    ext.anko_version = '0.10.5'
+    ext.litho_version = '0.11.0'
     repositories {
+        maven { url "http://dl.bintray.com/kotlin/kotlin-dev" }
         google()
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath 'com.android.tools.build:gradle:3.1.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
 plugins {
-    id "com.gradle.build-scan" version "1.12.1"
-    id "org.jlleitschuh.gradle.ktlint" version "3.0.1"
+    id "com.gradle.build-scan" version "1.13.4"
+    id "org.jlleitschuh.gradle.ktlint" version "4.0.0"
 }
 
 allprojects {
@@ -26,6 +28,7 @@ allprojects {
         maven { url "https://jitpack.io" }
         maven { url "https://kotlin.bintray.com/kotlinx" }
         maven { url "https://oss.sonatype.org/content/repositories/releases" }
+        maven { url "http://dl.bintray.com/kotlin/kotlin-dev" }
     }
 }
 

@@ -15,7 +15,7 @@ import brave.http.HttpTracing
 import brave.internal.Platform
 import brave.propagation.TraceContext
 import brave.sampler.Sampler
-import com.baulsupp.oksocial.authenticator.ServiceInterceptor
+import com.baulsupp.oksocial.commands.CommandLineClient
 import com.baulsupp.oksocial.credentials.InMemoryCredentialsStore
 import com.baulsupp.oksocial.network.DnsSelector
 import com.baulsupp.oksocial.network.IPvMode
@@ -119,7 +119,7 @@ class MainActivity : Activity() {
   private fun saveQueryToSharedPrefs() {
     sharedPrefs.edit().clear().putString("url", requestOptions.url).putBoolean("gms",
         clientOptions.gms).putBoolean("zipkin", clientOptions.zipkin).putBoolean("optimized",
-        clientOptions.optimized).putString("ipmode", clientOptions.iPvMode.name).apply()
+        clientOptions.optimized).putString("ipmode", clientOptions.iPvMode.code).apply()
   }
 
   private fun view() =
@@ -209,9 +209,10 @@ class MainActivity : Activity() {
 
     testBuilder.dns(DnsSelector(clientOptions.iPvMode, Dns.SYSTEM))
 
-    val credentialsStore = InMemoryCredentialsStore()
-    var serviceInterceptor = ServiceInterceptor(testBuilder.build(), credentialsStore)
-    testBuilder.addNetworkInterceptor(serviceInterceptor)
+    val cli = CommandLineClient()
+    cli.credentialsStore = InMemoryCredentialsStore()
+    cli.initialise()
+    testBuilder.addNetworkInterceptor(cli.authenticatingInterceptor)
 
     if (clientOptions.zipkin) {
       applyZipkin(testBuilder)
