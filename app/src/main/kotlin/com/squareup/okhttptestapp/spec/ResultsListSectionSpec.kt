@@ -17,12 +17,7 @@ import com.facebook.litho.widget.RenderInfo
 import com.facebook.litho.widget.Text
 import com.facebook.yoga.YogaEdge
 import com.squareup.okhttptestapp.model.AppEvent
-import com.squareup.okhttptestapp.model.ClientCreated
-import com.squareup.okhttptestapp.model.GmsInstall
-import com.squareup.okhttptestapp.model.NetworkEvent
-import com.squareup.okhttptestapp.model.PlatformEvent
 import com.squareup.okhttptestapp.model.CallEvent
-import com.squareup.okhttptestapp.model.SystemState
 
 @GroupSectionSpec
 object ResultsListSectionSpec {

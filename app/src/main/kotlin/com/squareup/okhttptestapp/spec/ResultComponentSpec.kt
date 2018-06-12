@@ -6,8 +6,8 @@ import android.support.annotation.RequiresApi
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
 import com.facebook.litho.ClickEvent
+import com.facebook.litho.Component
 import com.facebook.litho.ComponentContext
-import com.facebook.litho.ComponentLayout
 import com.facebook.litho.StateValue
 import com.facebook.litho.annotations.LayoutSpec
 import com.facebook.litho.annotations.OnCreateInitialState
@@ -19,7 +19,6 @@ import com.facebook.litho.annotations.Prop
 import com.facebook.litho.annotations.State
 import com.makeramen.litho.children
 import com.makeramen.litho.column
-import com.makeramen.litho.layout
 import com.makeramen.litho.text
 import com.squareup.okhttptestapp.model.CallEvent
 import com.squareup.okhttptestapp.model.CompletedResponse
@@ -31,8 +30,6 @@ import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Response
 import java.io.IOException
-import java.io.PrintWriter
-import java.io.StringWriter
 
 val errorSpan = ForegroundColorSpan(Color.parseColor("magenta"))
 val successSpan = ForegroundColorSpan(Color.parseColor("olive"))
@@ -77,8 +74,7 @@ object ResultComponentSpec {
 
   @OnCreateLayout
   fun onCreateLayout(
-      c: ComponentContext, @Prop result: CallEvent, @State response: ResponseModel, @State expanded: Boolean): ComponentLayout =
-      layout {
+      c: ComponentContext, @Prop result: CallEvent, @State response: ResponseModel, @State expanded: Boolean): Component =
         column(c) {
           children {
             text(c) {
@@ -87,8 +83,7 @@ object ResultComponentSpec {
               clickHandler(ResultComponent.onClick(c))
             }
           }
-        }
-      }
+        }.build()
 
   @OnUpdateState
   fun updateExpanded(expanded: StateValue<Boolean>) {

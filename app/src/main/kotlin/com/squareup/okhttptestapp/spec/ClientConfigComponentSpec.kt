@@ -1,8 +1,7 @@
 package com.squareup.okhttptestapp.spec
 
-import android.util.Log
+import com.facebook.litho.Component
 import com.facebook.litho.ComponentContext
-import com.facebook.litho.ComponentLayout
 import com.facebook.litho.StateValue
 import com.facebook.litho.annotations.LayoutSpec
 import com.facebook.litho.annotations.OnCreateInitialState
@@ -14,8 +13,7 @@ import com.facebook.litho.annotations.State
 import com.facebook.yoga.YogaWrap
 import com.makeramen.litho.children
 import com.makeramen.litho.column
-import com.makeramen.litho.component
-import com.makeramen.litho.layout
+import com.makeramen.litho.componentBuilder
 import com.makeramen.litho.row
 import com.squareup.okhttptestapp.model.ClientOptions
 
@@ -33,14 +31,13 @@ object ClientConfigComponentSpec {
       c: ComponentContext,
       @State clientOptions: ClientOptions,
       @Prop gmsAvailable: Boolean,
-      @Prop configListener: (ClientOptions) -> Unit): ComponentLayout =
-      layout {
+      @Prop configListener: (ClientOptions) -> Unit): Component =
         column(c) {
           children {
             row(c) {
               wrap(YogaWrap.WRAP)
               children {
-                component(c, CheckboxComponent::create) {
+                componentBuilder(c, CheckboxComponent::create) {
                   label("GMS")
                   checked(gmsAvailable && clientOptions.gms)
                   widthDip(80f)
@@ -52,7 +49,7 @@ object ClientConfigComponentSpec {
                     configListener(newClientOptions)
                   }
                 }
-                component(c, ConnectionSpecComponent::create) {
+                componentBuilder(c, ConnectionSpecComponent::create) {
                   initialConfigSpec(clientOptions.configSpec)
                   widthDip(160f)
                   heightDip(40f)
@@ -62,7 +59,7 @@ object ClientConfigComponentSpec {
                     configListener(newClientOptions)
                   }
                 }
-                component(c, CheckboxComponent::create) {
+                componentBuilder(c, CheckboxComponent::create) {
                   label("Z")
                   checked(clientOptions.zipkin)
                   widthDip(100f)
@@ -73,7 +70,7 @@ object ClientConfigComponentSpec {
                     configListener(newClientOptions)
                   }
                 }
-                component(c, CheckboxComponent::create) {
+                componentBuilder(c, CheckboxComponent::create) {
                   label("AOP")
                   checked(clientOptions.optimized)
                   widthDip(100f)
@@ -84,7 +81,7 @@ object ClientConfigComponentSpec {
                     configListener(newClientOptions)
                   }
                 }
-                component(c, IpModeComponent::create) {
+                componentBuilder(c, IpModeComponent::create) {
                   initialMode(clientOptions.iPvMode)
                   widthDip(160f)
                   heightDip(40f)
@@ -97,8 +94,7 @@ object ClientConfigComponentSpec {
               }
             }
           }
-        }
-      }
+      }.build()
 
   @OnUpdateState
   fun updateClientOptions(

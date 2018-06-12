@@ -1,8 +1,8 @@
 package com.squareup.okhttptestapp.spec
 
 import com.facebook.litho.ClickEvent
+import com.facebook.litho.Component
 import com.facebook.litho.ComponentContext
-import com.facebook.litho.ComponentLayout
 import com.facebook.litho.StateValue
 import com.facebook.litho.annotations.LayoutSpec
 import com.facebook.litho.annotations.OnCreateInitialState
@@ -13,7 +13,6 @@ import com.facebook.litho.annotations.Prop
 import com.facebook.litho.annotations.State
 import com.makeramen.litho.children
 import com.makeramen.litho.column
-import com.makeramen.litho.layout
 import com.makeramen.litho.text
 import com.squareup.okhttptestapp.model.AppEvent
 
@@ -27,8 +26,7 @@ object EventComponentSpec {
 
   @OnCreateLayout
   fun onCreateLayout(
-      c: ComponentContext, @Prop result: AppEvent, @State expanded: Boolean): ComponentLayout =
-      layout {
+      c: ComponentContext, @Prop result: AppEvent, @State expanded: Boolean): Component =
         column(c) {
           children {
             text(c) {
@@ -37,8 +35,7 @@ object EventComponentSpec {
               clickHandler(EventComponent.onClick(c))
             }
           }
-        }
-      }
+        }.build()
 
   @OnUpdateState
   fun updateExpanded(expanded: StateValue<Boolean>) {

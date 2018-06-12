@@ -10,8 +10,8 @@ import com.facebook.litho.annotations.MountSpec
 import com.facebook.litho.annotations.OnCreateMountContent
 import com.facebook.litho.annotations.OnMount
 import com.facebook.litho.annotations.Prop
-import com.squareup.okhttptestapp.model.allSpecs
 import com.squareup.okhttptestapp.model.ConfigSpec
+import com.squareup.okhttptestapp.model.allSpecs
 
 @MountSpec
 object ConnectionSpecComponentSpec {
