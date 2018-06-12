@@ -98,10 +98,19 @@ dependencies {
   implementation "com.facebook.litho:litho-sections-widget:$litho_version"
   implementation "com.facebook.litho:litho-annotations:$litho_version"
   implementation "com.facebook.litho:litho-sections-annotations:$litho_version"
+  debugImplementation ('com.facebook.sonar:sonar:0.0.1'){
+    exclude group: 'android'
+    exclude group: 'javax'
+    exclude group: 'jsr-305'
+    exclude group: 'okhttp3'
+    exclude group: 'okio'
+    exclude group: 'org'
+    exclude group: 'com.google'
+  }
   kapt "com.facebook.litho:litho-processor:$litho_version"
   kapt "com.facebook.litho:litho-sections-processor:$litho_version"
   // SoLoader
-  implementation 'com.facebook.soloader:soloader:0.3.0'
+  implementation 'com.facebook.soloader:soloader:0.4.1'
   // For testing
   testImplementation "com.facebook.litho:litho-testing:$litho_version"
   implementation 'com.bugsnag:bugsnag-android:4.3.1'
