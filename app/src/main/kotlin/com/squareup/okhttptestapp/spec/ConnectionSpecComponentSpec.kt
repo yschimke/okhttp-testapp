@@ -1,5 +1,6 @@
 package com.squareup.okhttptestapp.spec
 
+import android.content.Context
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -16,14 +17,15 @@ import com.squareup.okhttptestapp.model.allSpecs
 @MountSpec
 object ConnectionSpecComponentSpec {
   @OnCreateMountContent
-  fun onCreateMountContent(c: ComponentContext): Spinner = Spinner(c)
+  fun onCreateMountContent(c: Context): Spinner = Spinner(c)
 
   @OnMount
   fun onMount(
       c: ComponentContext,
       spinner: Spinner,
       @Prop initialConfigSpec: ConfigSpec,
-      @Prop selectionListener: (ConfigSpec) -> Unit) {
+      @Prop selectionListener: (ConfigSpec) -> Unit
+  ) {
     val specs = allSpecs
     val arrayAdapter: SpinnerAdapter = ArrayAdapter<ConfigSpec>(c,
         android.R.layout.simple_spinner_dropdown_item, specs)

@@ -28,8 +28,10 @@ data class SystemState(val state: String) : AppEvent() {
   }
 }
 
-data class GmsInstall(val error: String? = null,
-    val e: Exception? = null) : AppEvent() {
+data class GmsInstall(
+    val error: String? = null,
+    val e: Exception? = null
+) : AppEvent() {
   override fun display(expanded: Boolean): CharSequence {
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -53,8 +55,11 @@ data class GmsInstall(val error: String? = null,
   }
 }
 
-data class ClientCreated(val description: Provider, val platformName: String?,
-    val clientOptions: ClientOptions) : AppEvent() {
+data class ClientCreated(
+    val description: Provider,
+    val platformName: String?,
+    val clientOptions: ClientOptions
+) : AppEvent() {
   override fun display(expanded: Boolean): CharSequence {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
       val r = SpannableStringBuilder("Client: ")

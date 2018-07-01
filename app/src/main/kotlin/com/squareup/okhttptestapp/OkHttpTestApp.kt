@@ -9,7 +9,6 @@ import com.bugsnag.android.Bugsnag
 import com.facebook.soloader.SoLoader
 import com.facebook.sonar.android.AndroidSonarClient
 import com.facebook.sonar.android.utils.SonarUtils
-import com.facebook.sonar.plugins.console.ConsoleSonarPlugin
 import com.facebook.sonar.plugins.inspector.DescriptorMapping
 import com.facebook.sonar.plugins.inspector.InspectorSonarPlugin
 import com.facebook.sonar.plugins.network.NetworkSonarPlugin
@@ -31,7 +30,7 @@ class OkHttpTestApp : Application() {
 
     SoLoader.init(this, false)
     if (BuildConfig.DEBUG && SonarUtils.shouldEnableSonar(applicationContext)) {
-      val descriptorMapping = DescriptorMapping.withDefaults();
+      val descriptorMapping = DescriptorMapping.withDefaults()
 
       val client = AndroidSonarClient.getInstance(this)
       client.addPlugin(NetworkSonarPlugin())

@@ -27,7 +27,8 @@ object MainComponentSpec {
       @Prop configListener: (ClientOptions) -> Unit,
       @Prop gmsAvailable: Boolean,
       @Prop results: List<AppEvent>,
-      @Prop scrollController: RecyclerCollectionEventsController): Component =
+      @Prop scrollController: RecyclerCollectionEventsController
+  ): Component =
     column(c) {
       paddingDip(YogaEdge.ALL, 8f)
       children {

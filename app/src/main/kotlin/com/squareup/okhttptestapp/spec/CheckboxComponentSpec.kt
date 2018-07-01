@@ -1,5 +1,6 @@
 package com.squareup.okhttptestapp.spec
 
+import android.content.Context
 import android.widget.CheckBox
 import com.facebook.litho.ComponentContext
 import com.facebook.litho.annotations.MountSpec
@@ -11,11 +12,10 @@ import com.facebook.litho.annotations.PropDefault
 @MountSpec
 object CheckboxComponentSpec {
   @PropDefault
-  @JvmField
   val available = true
 
   @OnCreateMountContent
-  fun onCreateMountContent(c: ComponentContext): CheckBox = CheckBox(c)
+  fun onCreateMountContent(c: Context): CheckBox = CheckBox(c)
 
   @OnMount
   fun onMount(
@@ -24,7 +24,8 @@ object CheckboxComponentSpec {
       @Prop label: String,
       @Prop checked: Boolean,
       @Prop(optional = true) available: Boolean,
-      @Prop checkedListener: (Boolean) -> Unit) {
+      @Prop checkedListener: (Boolean) -> Unit
+  ) {
     checkbox.text = label
     checkbox.isChecked = checked
     checkbox.isEnabled = available

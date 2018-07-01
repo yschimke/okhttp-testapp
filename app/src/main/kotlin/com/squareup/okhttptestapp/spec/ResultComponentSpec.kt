@@ -39,10 +39,12 @@ val bodySpan = ForegroundColorSpan(Color.DKGRAY)
 @LayoutSpec
 object ResultComponentSpec {
   @OnCreateInitialState
-  fun createInitialState(c: ComponentContext,
+  fun createInitialState(
+      c: ComponentContext,
       response: StateValue<ResponseModel>,
       @Prop result: CallEvent,
-      expanded: StateValue<Boolean>) {
+      expanded: StateValue<Boolean>
+  ) {
     expanded.set(false)
     response.set(InProgress())
 
@@ -74,7 +76,11 @@ object ResultComponentSpec {
 
   @OnCreateLayout
   fun onCreateLayout(
-      c: ComponentContext, @Prop result: CallEvent, @State response: ResponseModel, @State expanded: Boolean): Component =
+      c: ComponentContext,
+      @Prop result: CallEvent,
+      @State response: ResponseModel,
+      @State expanded: Boolean
+  ): Component =
         column(c) {
           children {
             text(c) {
@@ -92,11 +98,14 @@ object ResultComponentSpec {
 
   @OnEvent(ClickEvent::class)
   fun onClick(c: ComponentContext) {
-    ResultComponent.updateExpandedAsync(c);
+    ResultComponent.updateExpandedAsync(c)
   }
 
-  private fun resultText(result: CallEvent, response: ResponseModel,
-      expanded: Boolean): CharSequence {
+  private fun resultText(
+      result: CallEvent,
+      response: ResponseModel,
+      expanded: Boolean
+  ): CharSequence {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
       return colorResultText(result, response, expanded)
     }
@@ -124,8 +133,11 @@ object ResultComponentSpec {
   }
 
   @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-  private fun colorResultText(result: CallEvent, response: ResponseModel,
-      expanded: Boolean): CharSequence {
+  private fun colorResultText(
+      result: CallEvent,
+      response: ResponseModel,
+      expanded: Boolean
+  ): CharSequence {
     val r = SpannableStringBuilder(result.call.request().url().toString())
     r.append(" ")
     when (response) {

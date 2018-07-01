@@ -12,8 +12,10 @@ import com.squareup.okhttptestapp.model.NetworkEvent
 
 @RequiresApi(Build.VERSION_CODES.M)
 class NetworkListener(val main: MainActivity) : ConnectivityManager.NetworkCallback() {
-  override fun onCapabilitiesChanged(network: Network?,
-      networkCapabilities: NetworkCapabilities?) {
+  override fun onCapabilitiesChanged(
+      network: Network?,
+      networkCapabilities: NetworkCapabilities?
+  ) {
     show(NetworkEvent("capabilities $network $networkCapabilities"))
   }
 

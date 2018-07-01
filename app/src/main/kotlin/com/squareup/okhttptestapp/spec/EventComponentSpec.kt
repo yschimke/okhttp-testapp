@@ -19,14 +19,19 @@ import com.squareup.okhttptestapp.model.AppEvent
 @LayoutSpec
 object EventComponentSpec {
   @OnCreateInitialState
-  fun createInitialState(c: ComponentContext,
-      expanded: StateValue<Boolean>) {
+  fun createInitialState(
+      c: ComponentContext,
+      expanded: StateValue<Boolean>
+  ) {
     expanded.set(false)
   }
 
   @OnCreateLayout
   fun onCreateLayout(
-      c: ComponentContext, @Prop result: AppEvent, @State expanded: Boolean): Component =
+      c: ComponentContext,
+      @Prop result: AppEvent,
+      @State expanded: Boolean
+  ): Component =
         column(c) {
           children {
             text(c) {
@@ -44,6 +49,6 @@ object EventComponentSpec {
 
   @OnEvent(ClickEvent::class)
   fun onClick(c: ComponentContext) {
-    EventComponent.updateExpandedAsync(c);
+    EventComponent.updateExpandedAsync(c)
   }
 }
