@@ -7,6 +7,12 @@ import android.os.Bundle
 import android.os.StrictMode
 import com.bugsnag.android.Bugsnag
 import com.facebook.soloader.SoLoader
+import com.facebook.sonar.android.AndroidSonarClient
+import com.facebook.sonar.android.utils.SonarUtils
+import com.facebook.sonar.plugins.inspector.DescriptorMapping
+import com.facebook.sonar.plugins.inspector.InspectorSonarPlugin
+import com.facebook.sonar.plugins.network.NetworkSonarPlugin
+import com.facebook.sonar.plugins.sharedpreferences.SharedPreferencesSonarPlugin
 
 lateinit var application: OkHttpTestApp
 
@@ -23,6 +29,15 @@ class OkHttpTestApp : Application() {
     strictMode()
 
     SoLoader.init(this, false)
+    if (BuildConfig.DEBUG && SonarUtils.shouldEnableSonar(applicationContext)) {
+      val descriptorMapping = DescriptorMapping.withDefaults()
+
+      val client = AndroidSonarClient.getInstance(this)
+      client.addPlugin(NetworkSonarPlugin())
+      client.addPlugin(SharedPreferencesSonarPlugin(applicationContext))
+      client.addPlugin(InspectorSonarPlugin(applicationContext, descriptorMapping))
+      client.start()
+    }
 
     registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
       override fun onActivityPaused(activity: Activity?) {

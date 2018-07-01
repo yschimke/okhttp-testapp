@@ -1,5 +1,6 @@
 package com.squareup.okhttptestapp.spec
 
+import android.content.Context
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -15,14 +16,15 @@ import com.facebook.litho.annotations.Prop
 @MountSpec
 object IpModeComponentSpec {
   @OnCreateMountContent
-  fun onCreateMountContent(c: ComponentContext): Spinner = Spinner(c)
+  fun onCreateMountContent(c: Context): Spinner = Spinner(c)
 
   @OnMount
   fun onMount(
       c: ComponentContext,
       spinner: Spinner,
       @Prop initialMode: IPvMode,
-      @Prop selectionListener: (IPvMode) -> Unit) {
+      @Prop selectionListener: (IPvMode) -> Unit
+  ) {
     val specs = IPvMode.values()
     val arrayAdapter: SpinnerAdapter = ArrayAdapter<IPvMode>(c,
         android.R.layout.simple_spinner_dropdown_item, specs)

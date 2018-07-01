@@ -37,7 +37,8 @@ class ChildHolder {
 fun <B : Component.Builder<B>> componentBuilder(
     c: ComponentContext,
     create: (c: ComponentContext) -> B,
-    init: B.() -> Unit): Component.Builder<B> {
+    init: B.() -> Unit
+): Component.Builder<B> {
   val builder = create(c)
   builder.init()
   return builder
@@ -53,7 +54,8 @@ fun <B : Component.Builder<B>> componentBuilder(
 fun <B : Component.Builder<B>> ChildHolder.componentBuilder(
     c: ComponentContext,
     create: (c: ComponentContext) -> B,
-    init: B.() -> Unit) {
+    init: B.() -> Unit
+) {
   val builder = create(c)
   builder.init()
   this.children.add(builder)
@@ -65,7 +67,8 @@ fun <B : Component.Builder<B>> ChildHolder.componentBuilder(
  */
 @LithoMarker
 fun <B : Component.ContainerBuilder<B>> Component.ContainerBuilder<B>.children(
-    init: ChildHolder.() -> Unit) {
+    init: ChildHolder.() -> Unit
+) {
   val childHolder = ChildHolder()
   childHolder.init()
   for (child in childHolder.children) {
@@ -166,13 +169,17 @@ fun ChildHolder.recycler(c: ComponentContext, init: Recycler.Builder.() -> Unit)
     componentBuilder(c, Recycler::create, init)
 
 @LithoMarker
-fun recyclerCollectionComponent(c: ComponentContext,
-    init: RecyclerCollectionComponent.Builder.() -> Unit) =
+fun recyclerCollectionComponent(
+    c: ComponentContext,
+    init: RecyclerCollectionComponent.Builder.() -> Unit
+) =
     componentBuilder(c, RecyclerCollectionComponent::create, init)
 
 @LithoMarker
-fun ChildHolder.recyclerCollectionComponent(c: ComponentContext,
-    init: RecyclerCollectionComponent.Builder.() -> Unit) =
+fun ChildHolder.recyclerCollectionComponent(
+    c: ComponentContext,
+    init: RecyclerCollectionComponent.Builder.() -> Unit
+) =
     componentBuilder(c, RecyclerCollectionComponent::create, init)
 
 @LithoMarker

@@ -36,7 +36,8 @@ object ResultsListSectionSpec {
   fun render(
       c: SectionContext,
       @FromEvent model: AppEvent,
-      @FromEvent index: Int): RenderInfo {
+      @FromEvent index: Int
+  ): RenderInfo {
     val component = when (model) {
       is CallEvent -> ResultComponent.create(c).result(model)
       else -> EventComponent.create(c).result(model)
@@ -59,7 +60,8 @@ object ResultsListSectionSpec {
   fun isSameItem(
       c: SectionContext,
       @FromEvent previousItem: AppEvent,
-      @FromEvent nextItem: AppEvent): Boolean {
+      @FromEvent nextItem: AppEvent
+  ): Boolean {
     return previousItem == nextItem
   }
 }

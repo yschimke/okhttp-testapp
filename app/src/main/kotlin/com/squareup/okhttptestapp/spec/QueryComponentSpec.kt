@@ -24,15 +24,20 @@ import com.squareup.okhttptestapp.model.RequestOptions
 @LayoutSpec
 object QueryComponentSpec {
   @OnCreateInitialState
-  fun createInitialState(c: ComponentContext,
+  fun createInitialState(
+      c: ComponentContext,
       requestOptions: StateValue<RequestOptions>,
-      @Prop initialRequestOptions: RequestOptions) {
+      @Prop initialRequestOptions: RequestOptions
+  ) {
     requestOptions.set(initialRequestOptions)
   }
 
   @OnCreateLayout
   fun onCreateLayout(
-      c: ComponentContext, @State requestOptions: RequestOptions, @Prop executeListener: (RequestOptions) -> Unit): Component =
+      c: ComponentContext,
+      @State requestOptions: RequestOptions,
+      @Prop executeListener: (RequestOptions) -> Unit
+  ): Component =
         column(c) {
           children {
             row(c) {
@@ -69,7 +74,8 @@ object QueryComponentSpec {
   @OnEvent(TextChangedEvent::class)
   fun onUrlChanged(
       c: ComponentContext,
-      @FromEvent text: String) {
+      @FromEvent text: String
+  ) {
     QueryComponent.updateUrl(c, text)
   }
 }

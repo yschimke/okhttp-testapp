@@ -20,9 +20,11 @@ import com.squareup.okhttptestapp.model.ClientOptions
 @LayoutSpec
 object ClientConfigComponentSpec {
   @OnCreateInitialState
-  fun createInitialState(c: ComponentContext,
+  fun createInitialState(
+      c: ComponentContext,
       clientOptions: StateValue<ClientOptions>,
-      @Prop initialClientOptions: ClientOptions) {
+      @Prop initialClientOptions: ClientOptions
+  ) {
     clientOptions.set(initialClientOptions)
   }
 
@@ -31,7 +33,8 @@ object ClientConfigComponentSpec {
       c: ComponentContext,
       @State clientOptions: ClientOptions,
       @Prop gmsAvailable: Boolean,
-      @Prop configListener: (ClientOptions) -> Unit): Component =
+      @Prop configListener: (ClientOptions) -> Unit
+  ): Component =
         column(c) {
           children {
             row(c) {
@@ -99,7 +102,8 @@ object ClientConfigComponentSpec {
   @OnUpdateState
   fun updateClientOptions(
       clientOptions: StateValue<ClientOptions>,
-      @Param newClientOptions: ClientOptions) {
+      @Param newClientOptions: ClientOptions
+  ) {
     clientOptions.set(newClientOptions)
   }
 }

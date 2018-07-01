@@ -1,6 +1,5 @@
 package com.squareup.okhttptestapp
 
-import android.util.Log
 import okhttp3.Call
 import okhttp3.Connection
 import okhttp3.EventListener
@@ -28,13 +27,21 @@ class TestEventListener : EventListener() {
 //    Log.i(TAG, handshake?.cipherSuite()?.javaName())
   }
 
-  override fun connectEnd(call: Call?, inetSocketAddress: InetSocketAddress?, proxy: Proxy?,
-      protocol: Protocol?) {
+  override fun connectEnd(
+      call: Call?,
+      inetSocketAddress: InetSocketAddress?,
+      proxy: Proxy?,
+      protocol: Protocol?
+  ) {
   }
 
-  override fun connectFailed(call: Call?, inetSocketAddress: InetSocketAddress?, proxy: Proxy?,
+  override fun connectFailed(
+      call: Call?,
+      inetSocketAddress: InetSocketAddress?,
+      proxy: Proxy?,
       protocol: Protocol?,
-      ioe: IOException?) {
+      ioe: IOException?
+  ) {
   }
 
   override fun connectionAcquired(call: Call?, connection: Connection?) {}

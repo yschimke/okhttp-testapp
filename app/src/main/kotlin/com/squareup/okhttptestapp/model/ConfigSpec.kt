@@ -31,9 +31,13 @@ object Example : ConfigSpec() {
   override fun toString(): String = "Example"
 }
 
-class AndroidSpec(val version: Int, val enabledTlsVersions: List<TlsVersion>,
-    val supportedTlsVersions: List<TlsVersion>, val enabled: List<String>,
-    val supported: List<String>) : ConfigSpec() {
+class AndroidSpec(
+    val version: Int,
+    val enabledTlsVersions: List<TlsVersion>,
+    val supportedTlsVersions: List<TlsVersion>,
+    val enabled: List<String>,
+    val supported: List<String>
+) : ConfigSpec() {
 
   // TODO warning for modes not supported on running version
   override fun connectionSpec(): ConnectionSpec = ConnectionSpec.Builder(
