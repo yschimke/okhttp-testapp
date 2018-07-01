@@ -1,8 +1,8 @@
 package com.squareup.okhttptestapp.spec
 
 import android.text.InputType
+import com.facebook.litho.Component
 import com.facebook.litho.ComponentContext
-import com.facebook.litho.ComponentLayout
 import com.facebook.litho.StateValue
 import com.facebook.litho.annotations.FromEvent
 import com.facebook.litho.annotations.LayoutSpec
@@ -16,9 +16,8 @@ import com.facebook.litho.annotations.State
 import com.facebook.litho.widget.TextChangedEvent
 import com.makeramen.litho.children
 import com.makeramen.litho.column
-import com.makeramen.litho.component
+import com.makeramen.litho.componentBuilder
 import com.makeramen.litho.editText
-import com.makeramen.litho.layout
 import com.makeramen.litho.row
 import com.squareup.okhttptestapp.model.RequestOptions
 
@@ -33,8 +32,7 @@ object QueryComponentSpec {
 
   @OnCreateLayout
   fun onCreateLayout(
-      c: ComponentContext, @State requestOptions: RequestOptions, @Prop executeListener: (RequestOptions) -> Unit): ComponentLayout =
-      layout {
+      c: ComponentContext, @State requestOptions: RequestOptions, @Prop executeListener: (RequestOptions) -> Unit): Component =
         column(c) {
           children {
             row(c) {
@@ -50,7 +48,7 @@ object QueryComponentSpec {
             }
             row(c) {
               children {
-                component(c, ButtonComponent::create) {
+                componentBuilder(c, ButtonComponent::create) {
                   label("Fetch")
                   widthDip(100f)
                   heightDip(40f)
@@ -61,8 +59,7 @@ object QueryComponentSpec {
               }
             }
           }
-        }
-      }
+      }.build()
 
   @OnUpdateState
   fun updateUrl(requestOptions: StateValue<RequestOptions>, @Param updatedText: String) {

@@ -72,7 +72,7 @@ dependencies {
   implementation 'com.squareup.okhttp3:okhttp:3.10.0'
   implementation 'com.android.support:appcompat-v7:27.1.1'
   implementation 'com.android.support:design:27.1.1'
-  implementation 'com.android.support.constraint:constraint-layout:1.1.0'
+  implementation 'com.android.support.constraint:constraint-layout:1.1.2'
   implementation 'com.google.android.gms:play-services-base:15.0.1'
   implementation 'com.android.support:support-core-utils:27.1.1'
   implementation 'com.android.support:support-compat:27.1.1'
@@ -81,14 +81,14 @@ dependencies {
   implementation 'com.android.support:percent:27.1.1'
   implementation 'com.android.support:multidex:1.0.3'
   implementation 'com.github.franmontiel:PersistentCookieJar:v1.0.1'
-  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.22.5'
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.23.3'
   implementation "org.jetbrains.anko:anko-sdk25:$anko_version"
   implementation "org.jetbrains.anko:anko-sdk25-coroutines:$anko_version"
   implementation "org.jetbrains.anko:anko-appcompat-v7:$anko_version"
-  implementation 'io.zipkin.reporter2:zipkin-sender-okhttp3:2.6.1'
-  implementation 'io.zipkin.brave:brave-okhttp:4.13.4'
-  implementation 'io.zipkin.brave:brave-instrumentation-okhttp3:5.0.0'
-  implementation 'io.zipkin.brave:brave:5.0.0'
+  implementation 'io.zipkin.reporter2:zipkin-sender-okhttp3:2.7.6'
+  implementation 'io.zipkin.brave:brave-okhttp:4.13.5'
+  implementation 'io.zipkin.brave:brave-instrumentation-okhttp3:5.1.2'
+  implementation 'io.zipkin.brave:brave:5.1.2'
   // ...
   // Litho
   implementation "com.facebook.litho:litho-core:$litho_version"
