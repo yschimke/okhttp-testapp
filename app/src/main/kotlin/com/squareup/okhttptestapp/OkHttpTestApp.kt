@@ -19,6 +19,8 @@ lateinit var application: OkHttpTestApp
 class OkHttpTestApp : Application() {
   lateinit var mainActivity: MainActivity
 
+  val networkSonarPlugin = NetworkSonarPlugin()
+
   override fun onCreate() {
     super.onCreate()
 
@@ -33,7 +35,7 @@ class OkHttpTestApp : Application() {
       val descriptorMapping = DescriptorMapping.withDefaults()
 
       val client = AndroidSonarClient.getInstance(this)
-      client.addPlugin(NetworkSonarPlugin())
+      client.addPlugin(networkSonarPlugin)
       client.addPlugin(SharedPreferencesSonarPlugin(applicationContext))
       client.addPlugin(InspectorSonarPlugin(applicationContext, descriptorMapping))
       client.start()

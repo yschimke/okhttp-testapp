@@ -25,6 +25,7 @@ import com.baulsupp.oksocial.tracing.ZipkinTracingListener
 import com.facebook.litho.LithoView
 import com.facebook.litho.sections.SectionContext
 import com.facebook.litho.sections.widget.RecyclerCollectionEventsController
+import com.facebook.sonar.plugins.network.SonarOkhttpInterceptor
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
@@ -213,6 +214,8 @@ class MainActivity : Activity() {
     cli.credentialsStore = InMemoryCredentialsStore()
     cli.initialise()
     testBuilder.addNetworkInterceptor(cli.authenticatingInterceptor)
+    val networkSonarPlugin = (this.application as OkHttpTestApp).networkSonarPlugin
+    testBuilder.addNetworkInterceptor(SonarOkhttpInterceptor(networkSonarPlugin))
 
     if (clientOptions.zipkin) {
       applyZipkin(testBuilder)
