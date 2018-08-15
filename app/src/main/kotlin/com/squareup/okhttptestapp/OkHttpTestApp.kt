@@ -31,7 +31,7 @@ class OkHttpTestApp : Application() {
     strictMode()
 
     SoLoader.init(this, false)
-    if (BuildConfig.DEBUG && SonarUtils.shouldEnableSonar(applicationContext)) {
+    if (SonarUtils.shouldEnableSonar(applicationContext)) {
       val descriptorMapping = DescriptorMapping.withDefaults()
 
       val client = AndroidSonarClient.getInstance(this)
