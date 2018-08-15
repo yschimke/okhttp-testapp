@@ -6,7 +6,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.SpinnerAdapter
-import com.baulsupp.oksocial.network.IPvMode
+import com.baulsupp.okurl.network.IPvMode
 import com.facebook.litho.ComponentContext
 import com.facebook.litho.annotations.MountSpec
 import com.facebook.litho.annotations.OnCreateMountContent
